@@ -33,7 +33,7 @@ class DashboardAction
         if (!$data['sensor'])
             return false;
         $data['parameters'] = array_map('trim', explode(",", $data['sensor']->parameters));
-        $data['key'] = array_search('wind_direction_(°)', $data['parameters']);
+        $data['key'] = (array_search('wind_direction_(°)', $data['parameters']) + 1);
         return $data;
     }
 
