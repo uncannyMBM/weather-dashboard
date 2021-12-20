@@ -18,8 +18,10 @@ class DashboardController extends Controller
         try {
             throw_if(!in_array($id, config('basestations.allow')), 'You are not allow to show the dashboard of this base station');
 
+            $base = $action->getBaseStationById($id);
             $data = $action->getSensorData($id);
-            $data['base'] = $action->getBaseStationById($id);
+            $data['base'] = $base;
+            $data['is_wind_direction'] = isset($data['sensor']) ? true : false;
             return view('pages.dashboard', $data);
         } catch (\Exception $exception) {
             return back()->with('alert', $exception->getMessage());

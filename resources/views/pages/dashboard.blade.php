@@ -14,7 +14,7 @@
 @section('content')
     @include('partials.alert')
     <div id="main-charts">
-        @if($sensor && in_array('wind_direction_(°)', $parameters))
+        @if($is_wind_direction)
             <div class="card">
                 <div class="card-header">
                     <h4>Wind direction</h4>
@@ -33,7 +33,7 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
 @endpush
 @section('scripts')
-    @if($sensor && in_array('wind_direction_(°)', $parameters))
+    @if($is_wind_direction)
         <script>
             var gauge;
             anychart.onDocumentReady(function () {
@@ -92,7 +92,7 @@
         let newVue = new Vue({
             el: "#main-charts",
             data: {
-                is_wind_direction: "{{ in_array('wind_direction_(°)', $parameters) ? true : false }}"
+                is_wind_direction: "{{ $is_wind_direction }}"
             },
             beforeMount() {
                 if (this.is_wind_direction) {

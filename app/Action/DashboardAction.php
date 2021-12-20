@@ -25,22 +25,20 @@ class DashboardAction
 
     public function getSensorData($id)
     {
-        $data['sensor'] = DB::table('base_station_sensors')
+        $sensors = DB::table('base_station_sensors')
             ->select('id', 'base_station_id', 'parameters')
             ->where('base_station_id', $id)
-            ->first();
-
-        if (!$data['sensor'])
+            ->get();
+        if (!$sensors)
             return false;
-        $data['parameters'] = array_map('trim', explode(",", $data['sensor']->parameters));
-        $data['key'] = (array_search('wind_direction_(°)', $data['parameters']) + 1);
+        $data = $this->findSensorKey($sensors, 'wind_direction_(°)');
         return $data;
     }
 
     public function getWindDirectionChartData(Request $request)
     {
         $sensor = $this->getSensorData($request->id);
-        if (!$sensor)
+        if (!isset($sensor['sensor']))
             return null;
         $sensorData = DB::table('base_station_sensors_data')
             ->selectRaw('id ,sensors_id, TRIM(D' . $sensor['key'] . ') AS data')
@@ -48,5 +46,19 @@ class DashboardAction
             ->latest()
             ->first();
         return $sensorData;
+    }
+
+    protected function findSensorKey($sensors, $key)
+    {
+        foreach ($sensors as $sensor) {
+            $data['parameters'] = array_map('trim', explode(",", $sensor->parameters));
+            $data['key'] = array_search($key, $data['parameters']);
+            if ($data['key'] > -1) {
+                $data['sensor'] = $sensor;
+                $data['key'] = $data['key'] + 1;
+                return $data;
+            }
+        }
+        return $data;
     }
 }
