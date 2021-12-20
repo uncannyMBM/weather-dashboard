@@ -95,21 +95,21 @@
                 is_wind_direction: "{{ $is_wind_direction }}"
             },
             beforeMount() {
-                if (this.is_wind_direction) {
-                    this.getChartData();
-                }
+                this.getChartData();
             },
             methods: {
                 getChartData() {
                     axios.get("{{ route('get.chart.data') }}", {params: {id: "{{ $base->id }}"}}).then((response) => {
-                        if (response.data.windDirection) {
-                            gauge.label().text(`<span style="color: #64B5F6; font-size: 13px">Wind Direction: </span>
+                        if (this.is_wind_direction) {
+                            if (response.data.windDirection) {
+                                gauge.label().text(`<span style="color: #64B5F6; font-size: 13px">Wind Direction: </span>
                                 <span style="color: #5AA3DD; font-size: 15px">
                                 ${response.data.windDirection.data}
                                 \u00B0 (+/- 0.5\u00B0)</span><br>`);
-                            gauge.data([response.data.windDirection.data]);
-                        } else {
-                            gauge.data([0]);
+                                gauge.data([response.data.windDirection.data]);
+                            } else {
+                                gauge.data([0]);
+                            }
                         }
                     });
                 },
