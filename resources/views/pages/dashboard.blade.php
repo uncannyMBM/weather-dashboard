@@ -3,27 +3,86 @@
     <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
     <style>
-        #wind-direction-chart {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        [v-cloak] {
+            display: none;
         }
     </style>
 @endpush
 @section('content')
     @include('partials.alert')
     <div id="main-charts">
-        @if($is_wind_direction)
-            <div class="card">
-                <div class="card-header">
-                    <h4>Wind direction</h4>
+        <div class="row">
+            @if($is_air_temp)
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup style="font-size: 16px;">°</sup></h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="air-temp-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="wind-direction-chart" style="width: 100%;height: 500px;"></div>
+            @endif
+            @if($is_wind_speed || $is_gust_speed)
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Wind Speed: <span v-cloak>@{{ wind_speed }}</span> <sub>(m/s)</sub></h6>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <h6>Gust Speed: <span v-cloak>@{{ gust_speed }}</span> <sub>(m/s)</sub></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="wind-gust-speed-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
+        <div class="row mt-5">
+            @if($is_atmospheric_pressure)
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Atmospheric pressure: <span v-cloak>@{{ atmospheric_pressure }}</span> <sub>(hPa)</sub>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="atmospheric-pressure-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if($is_relative_humidity)
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Relative Humidity: <span v-cloak>@{{ relative_humidity }}%</span></h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="relative-humidity-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if($is_wind_direction)
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Wind direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup></h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
     </div>
 @endsection
 @push('extra_scripts')
@@ -31,85 +90,74 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
+    @if($is_air_temp)
+        <script src="{{ asset('js/air-temparature.js') }}"></script>
+    @endif
+    @if($is_wind_speed || $is_gust_speed)
+        <script src="{{ asset('js/wind-gust-speed.js') }}"></script>
+    @endif
+    @if($is_atmospheric_pressure)
+        <script src="{{ asset('js/atmospheric-pressure.js') }}"></script>
+    @endif
+    @if($is_relative_humidity)
+        <script src="{{ asset('js/relative-humidity.js') }}"></script>
+    @endif
+    @if($is_wind_direction)
+        <script src="{{ asset('js/wind-direction.js') }}"></script>
+    @endif
 @endpush
 @section('scripts')
-    @if($is_wind_direction)
-        <script>
-            var gauge;
-            anychart.onDocumentReady(function () {
-                gauge = anychart.gauges.circular();
-
-                gauge.fill('#fff').stroke(null).padding(0).margin(30).startAngle(0).sweepAngle(360);
-
-                gauge.axis().labels().padding(3).position('outside').format('{%Value}\u00B0');
-
-                gauge.axis().scale().minimum(0).maximum(360).ticks({interval: 30}).minorTicks({interval: 10});
-
-                gauge.axis().fill('#7c868e').startAngle(0).sweepAngle(-360).width(1).ticks({
-                    type: 'line',
-                    fill: '#7c868e',
-                    length: 4,
-                    position: 'outside'
-                });
-
-                gauge.marker().fill('#64b5f6').stroke(null).size('15%').zIndex(120).radius('97%');
-
-                gauge.needle().fill('#1976d2').stroke(null).axisIndex(1).startRadius('6%').endRadius('38%').startWidth('2%').middleWidth(null).endWidth('0');
-
-                gauge.cap().radius('4%').fill('#1976d2').enabled(true).stroke(null);
-
-                var bigTooltipTitleSettings = {
-                    fontFamily: '\'Verdana\', Helvetica, Arial, sans-serif',
-                    fontWeight: 'normal',
-                    fontSize: '12px',
-                    hAlign: 'left',
-                    fontColor: '#212121'
-                };
-
-                gauge
-                    .label()
-                    .useHtml(true)
-                    .textSettings(bigTooltipTitleSettings);
-
-                gauge.label().hAlign('center').anchor('center-top').offsetY(-20).padding(15, 20)
-                    .background({
-                        fill: '#fff',
-                        stroke: {
-                            thickness: 1,
-                            color: '#E0F0FD'
-                        }
-                    });
-
-                // set container id for the chart
-                gauge.container('wind-direction-chart');
-
-                // initiate chart drawing
-                gauge.draw();
-            });
-        </script>
-    @endif
     <script>
         let newVue = new Vue({
             el: "#main-charts",
             data: {
-                is_wind_direction: "{{ $is_wind_direction }}"
+                is_air_temp: "{{ $is_air_temp }}",
+                is_wind_speed: "{{ $is_wind_speed }}",
+                is_gust_speed: "{{ $is_gust_speed }}",
+                is_atmospheric_pressure: "{{ $is_atmospheric_pressure }}",
+                is_relative_humidity: "{{ $is_relative_humidity }}",
+                is_wind_direction: "{{ $is_wind_direction }}",
+                air_temp: '0',
+                wind_speed: '0',
+                gust_speed: '0',
+                atmospheric_pressure: '0',
+                relative_humidity: '0',
+                wind_direction: '0',
             },
             beforeMount() {
                 this.getChartData();
             },
             methods: {
                 getChartData() {
+                    let _this = this;
                     axios.get("{{ route('get.chart.data') }}", {params: {id: "{{ $base->id }}"}}).then((response) => {
-                        if (this.is_wind_direction) {
-                            if (response.data.windDirection) {
-                                gauge.label().text(`<span style="color: #64B5F6; font-size: 13px">Wind Direction: </span>
-                                <span style="color: #5AA3DD; font-size: 15px">
-                                ${response.data.windDirection.data}
-                                \u00B0 (+/- 0.5\u00B0)</span><br>`);
-                                gauge.data([response.data.windDirection.data]);
-                            } else {
-                                gauge.data([0]);
-                            }
+                        if (_this.is_air_temp) {
+                            let airData = response.data.airTempData ? response.data.airTempData.data : 0;
+                            gaugeAirTemp.data([airData]);
+                            _this.air_temp = airData;
+                        }
+                        if (_this.is_wind_speed || _this.is_gust_speed) {
+                            let windData = response.data.windSpeedData ? response.data.windSpeedData.data : 0;
+                            let gustData = response.data.gustSpeedData ? response.data.gustSpeedData.data : 0;
+                            gaugeWindGustSpeed.data([windData, gustData]);
+                            _this.wind_speed = windData;
+                            _this.gust_speed = gustData;
+                        }
+                        if (_this.is_atmospheric_pressure) {
+                            let atmostphericData = response.data.atmosphericPressureData ? response.data.atmosphericPressureData.data : 0;
+                            gaugeAtmosphericPressure.data([atmostphericData]);
+                            _this.atmospheric_pressure = atmostphericData;
+
+                        }
+                        if (_this.is_relative_humidity) {
+                            let humidityData = response.data.relativeHumidityData ? response.data.relativeHumidityData.data : 0;
+                            gaugeRelativeHumidity.data([humidityData]);
+                            _this.relative_humidity = humidityData;
+                        }
+                        if (_this.is_wind_direction) {
+                            let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
+                            gaugeWindDirection.data([directionData]);
+                            _this.wind_direction = directionData;
                         }
                     });
                 },
