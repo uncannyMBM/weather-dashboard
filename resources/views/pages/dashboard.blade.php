@@ -6,6 +6,9 @@
         [v-cloak] {
             display: none;
         }
+        .anychart-credits{
+            display: none !important;
+        }
     </style>
 @endpush
 @section('content')
