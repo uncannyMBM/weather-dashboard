@@ -49,7 +49,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Atmospheric pressure: <span v-cloak>@{{ atmospheric_pressure }}</span> <sub>(hPa)</sub>
+                            <h6>Atmospheric Pressure: <span v-cloak>@{{ atmospheric_pressure }}</span> <sub>(hPa)</sub>
                             </h6>
                         </div>
                         <div class="card-body">
@@ -74,7 +74,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Wind direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup></h6>
+                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup></h6>
                         </div>
                         <div class="card-body">
                             <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
