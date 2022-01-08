@@ -6,7 +6,8 @@
         [v-cloak] {
             display: none;
         }
-        .anychart-credits{
+
+        .anychart-credits {
             display: none !important;
         }
     </style>
@@ -47,6 +48,25 @@
                 </div>
             @endif
         </div>
+
+        <div class="row mt-5">
+            @if($is_rain_fall)
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6>Rainfall: <span v-cloak>@{{ rain_fall }}</span> <sub>(mm)</sub></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="rainfall-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
         <div class="row mt-5">
             @if($is_atmospheric_pressure)
                 <div class="col-md-4">
@@ -77,7 +97,8 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup></h6>
+                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup>
+                            </h6>
                         </div>
                         <div class="card-body">
                             <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
@@ -93,11 +114,16 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-linear-gauge.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     @if($is_air_temp)
         <script src="{{ asset('js/air-temparature.js') }}"></script>
     @endif
     @if($is_wind_speed || $is_gust_speed)
         <script src="{{ asset('js/wind-gust-speed.js') }}"></script>
+    @endif
+    @if($is_rain_fall)
+        <script src="{{ asset('js/rainfall.js') }}"></script>
     @endif
     @if($is_atmospheric_pressure)
         <script src="{{ asset('js/atmospheric-pressure.js') }}"></script>
@@ -114,18 +140,21 @@
         let newVue = new Vue({
             el: "#main-charts",
             data: {
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 is_air_temp: "{{ $is_air_temp }}",
                 is_wind_speed: "{{ $is_wind_speed }}",
                 is_gust_speed: "{{ $is_gust_speed }}",
                 is_atmospheric_pressure: "{{ $is_atmospheric_pressure }}",
                 is_relative_humidity: "{{ $is_relative_humidity }}",
                 is_wind_direction: "{{ $is_wind_direction }}",
+                is_rain_fall: "{{ $is_rain_fall }}",
                 air_temp: '0',
                 wind_speed: '0',
                 gust_speed: '0',
                 atmospheric_pressure: '0',
                 relative_humidity: '0',
                 wind_direction: '0',
+                rain_fall: '0',
             },
             beforeMount() {
                 this.getChartData();
@@ -133,36 +162,48 @@
             methods: {
                 getChartData() {
                     let _this = this;
-                    axios.get("{{ route('get.chart.data') }}", {params: {id: "{{ $base->id }}"}}).then((response) => {
-                        if (_this.is_air_temp) {
-                            let airData = response.data.airTempData ? response.data.airTempData.data : 0;
-                            gaugeAirTemp.data([airData]);
-                            _this.air_temp = airData;
+                    let currentTime = moment().format();
+                    axios.get("{{ route('get.chart.data') }}", {
+                        params: {
+                            id: "{{ $base->id }}",
+                            currentTime: currentTime
                         }
-                        if (_this.is_wind_speed || _this.is_gust_speed) {
-                            let windData = response.data.windSpeedData ? response.data.windSpeedData.data : 0;
-                            let gustData = response.data.gustSpeedData ? response.data.gustSpeedData.data : 0;
-                            gaugeWindGustSpeed.data([windData, gustData]);
-                            _this.wind_speed = windData;
-                            _this.gust_speed = gustData;
-                        }
-                        if (_this.is_atmospheric_pressure) {
-                            let atmostphericData = response.data.atmosphericPressureData ? response.data.atmosphericPressureData.data : 0;
-                            gaugeAtmosphericPressure.data([atmostphericData]);
-                            _this.atmospheric_pressure = atmostphericData;
+                    })
+                        .then((response) => {
+                            if (_this.is_air_temp) {
+                                let airData = response.data.airTempData ? response.data.airTempData.data : 0;
+                                gaugeAirTemp.data([airData]);
+                                _this.air_temp = airData;
+                            }
+                            if (_this.is_wind_speed || _this.is_gust_speed) {
+                                let windData = response.data.windSpeedData ? response.data.windSpeedData.data : 0;
+                                let gustData = response.data.gustSpeedData ? response.data.gustSpeedData.data : 0;
+                                gaugeWindGustSpeed.data([windData, gustData]);
+                                _this.wind_speed = windData;
+                                _this.gust_speed = gustData;
+                            }
+                            if (_this.is_rain_fall) {
+                                let rainData = response.data.rainFallData ? response.data.rainFallData.data : 0;
+                                rainfall.data([rainData]);
+                                _this.rain_fall = rainData;
+                            }
+                            if (_this.is_atmospheric_pressure) {
+                                let atmostphericData = response.data.atmosphericPressureData ? response.data.atmosphericPressureData.data : 0;
+                                gaugeAtmosphericPressure.data([atmostphericData]);
+                                _this.atmospheric_pressure = atmostphericData;
 
-                        }
-                        if (_this.is_relative_humidity) {
-                            let humidityData = response.data.relativeHumidityData ? response.data.relativeHumidityData.data : 0;
-                            gaugeRelativeHumidity.data([humidityData]);
-                            _this.relative_humidity = humidityData;
-                        }
-                        if (_this.is_wind_direction) {
-                            let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
-                            gaugeWindDirection.data([directionData]);
-                            _this.wind_direction = directionData;
-                        }
-                    });
+                            }
+                            if (_this.is_relative_humidity) {
+                                let humidityData = response.data.relativeHumidityData ? response.data.relativeHumidityData.data : 0;
+                                gaugeRelativeHumidity.data([humidityData]);
+                                _this.relative_humidity = humidityData;
+                            }
+                            if (_this.is_wind_direction) {
+                                let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
+                                gaugeWindDirection.data([directionData]);
+                                _this.wind_direction = directionData;
+                            }
+                        });
                 },
             },
         });

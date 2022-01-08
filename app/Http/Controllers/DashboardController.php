@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Action\DashboardAction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -23,6 +24,7 @@ class DashboardController extends Controller
             $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
             $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
             $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+            $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
             $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
             $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
             $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
@@ -32,6 +34,7 @@ class DashboardController extends Controller
             $data['is_air_temp'] = isset($airTempData['sensor']) ? true : false;
             $data['is_wind_speed'] = isset($windSpeedData['sensor']) ? true : false;
             $data['is_gust_speed'] = isset($gustSpeedData['sensor']) ? true : false;
+            $data['is_rain_fall'] = isset($rainFallData['sensor']) ? true : false;
             $data['is_atmospheric_pressure'] = isset($atmosphericPressureData['sensor']) ? true : false;
             $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
             $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
@@ -43,6 +46,11 @@ class DashboardController extends Controller
 
     public function getChartData(Request $request, DashboardAction $action)
     {
+
+        $convertedUTCTime = Carbon::parse(Carbon::parse($request->currentTime)->setTimezone(config('app.timezone'))->toDateTimeString());
+        $timeOf8Am = today()->addHours(8)->addMinutes(59);
+        $today9Am = today()->addHours(9);
+        $timeBetween = $convertedUTCTime->gt($timeOf8Am) == false ? [$today9Am->subDay()->toDateTimeString(), $timeOf8Am->toDateTimeString()] : [$today9Am->toDateTimeString(), now()->toDateTimeString()];
         $sensors = $action->getSensorData($request->id);
 
         $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
@@ -53,6 +61,9 @@ class DashboardController extends Controller
 
         $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
         $data['gustSpeedData'] = $action->getLatestChartData($gustSpeedData);
+
+        $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
+        $data['rainFallData'] = $action->getSumChartData($rainFallData, $timeBetween);
 
         $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
         $data['atmosphericPressureData'] = $action->getLatestChartData($atmosphericPressureData);
