@@ -190,7 +190,7 @@
         <script src="{{ asset('js/rainfall.js') }}"></script>
     @endif
     @if($is_uv)
-        <script src="{{ asset('js/rainfall.js') }}"></script>
+        <script src="{{ asset('js/uv.js') }}"></script>
     @endif
     @if($is_atmospheric_pressure)
         <script src="{{ asset('js/atmospheric-pressure.js') }}"></script>
