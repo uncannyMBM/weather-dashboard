@@ -20,7 +20,12 @@ class DashboardAction
 
     public function getBaseStationById($id)
     {
-        return BaseStation::select('id', 'tag', 'name', 'iot_endpoint_model_id', 'deleted_at')->findOrFail($id);
+        return BaseStation::select('id', 'tag', 'name', 'iot_endpoint_model_id', 'time_zone', 'status', 'latest_data_timestamp', 'deleted_at')->findOrFail($id);
+    }
+
+    public function getBaseStationByBaseStationId($id)
+    {
+        return DB::table('base_station_parameters')->select('id', 'battery_voltage', 'rssi', 'is_external_power_available', 'is_charging', 'primary_data_source_types_id')->where('base_station_id', $id)->latest()->first();
     }
 
     public function getSensorData($id)
