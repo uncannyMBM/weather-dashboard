@@ -21,7 +21,7 @@ anychart.onDocumentReady(function () {
                 position: 'outside'
             }
         );
-    axis.scale().minimum(0).maximum(2000).ticks({interval: 50}).minorTicks({interval: 10});
+    axis.scale().minimum(0).maximum(2000).ticks({interval: 200}).minorTicks({interval: 50});
 
     axis.labels().position('outside');
 

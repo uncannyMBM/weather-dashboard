@@ -2,6 +2,7 @@
 @push('extra_styles')
     <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+
     <style>
         [v-cloak] {
             display: none;
@@ -15,27 +16,46 @@
 @section('content')
     @include('partials.alert')
     <div id="main-charts">
-        <div class="row">
-            <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-                <ul class="list-inline">
-                    <li class="list-inline-item">State: <span class="text-success">{{ $base->status == 1 ? 'Active' : ($base->status == 2 ? 'Data Fault' : ($base->status == 3 ? 'Inactive' : (($base->status == 4 ? 'No Data' : (($base->status == 6 ? 'Terminated' : '')))))) }}</span></li>
-                    <li class="list-inline-item">Base Station Name: <span class="text-success">{{ $base->name }}</span></li>
-                    <li class="list-inline-item">Battery voltage: <span class="text-success">{{ $baseParams->battery_voltage }} V</span></li>
-                    <li class="list-inline-item">RSSI: <span class="text-success">{{ $baseParams->rssi }}</span></li>
-                    <li class="list-inline-item">External Power: <span class="text-success">{{ $baseParams->is_external_power_available == 1 ? 'Yes' : 'No' }}</span></li>
-                    <li class="list-inline-item">Charging: <span class="text-success">{{ $baseParams->is_charging == 1 ? 'Yes' : 'No' }}</span></li>
-                    <li class="list-inline-item">Data Transfer Mode: <span class="text-success">{{ $baseParams->primary_data_source_types_id == 4 ? 'MQTT Mode' : ' ' }}</span></li>
-                    <li class="list-inline-item">At: <span class="text-success">{{ \Carbon\Carbon::parse($base->latest_data_timestamp)->format('d-m-Y h:i:s A') }}</span></li>
-                    <li class="list-inline-item">Timezone: <span class="text-success">{{ $base->time_zone }}</span></li>
-                </ul>
+        <div class="row mt-1">
+            <div class="col-md-12">
+                <div class="p-3 px-md-4 mb-3 bg-secondary border-bottom box-shadow">
+                    <ul class="mb-0 list-inline d-flex flex-column flex-md-row justify-content-between align-items-center">
+                        <li class="list-inline-item text-white">State: <span
+                                    class="text-warning">{{ $base->status == 1 ? 'Active' : ($base->status == 2 ? 'Data Fault' : ($base->status == 3 ? 'Inactive' : (($base->status == 4 ? 'No Data' : (($base->status == 6 ? 'Terminated' : '')))))) }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">Base Station Name: <span
+                                    class="text-warning">{{ $base->name }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">Battery voltage:
+                            <span class="text-warning">{{ $baseParams->battery_voltage }} V</span></li>
+                        <li class="list-inline-item text-white">RSSI: <span
+                                    class="text-warning">{{ $baseParams->rssi }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">External Power: <span
+                                    class="text-warning">{{ $baseParams->is_external_power_available == 1 ? 'Yes' : 'No' }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">Charging: <span
+                                    class="text-warning">{{ $baseParams->is_charging == 1 ? 'Yes' : 'No' }}</span></li>
+                        <li class="list-inline-item text-white">Data Transfer Mode: <span
+                                    class="text-warning">{{ $baseParams->primary_data_source_types_id == 4 ? 'MQTT Mode' : ' ' }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">At: <span
+                                    class="text-warning">{{ \Carbon\Carbon::parse($base->latest_data_timestamp)->format('d-m-Y h:i:s A') }}</span>
+                        </li>
+                        <li class="list-inline-item text-white">Timezone: <span
+                                    class="text-warning">{{ $base->time_zone }}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="row">
             @if($is_air_temp)
-                <div class="col-md-4">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup style="font-size: 16px;">°</sup></h6>
+                            <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup
+                                        style="font-size: 16px;">°</sup></h6>
                         </div>
                         <div class="card-body">
                             <div id="air-temp-chart" style="width: 100%;height: 300px;"></div>
@@ -44,7 +64,7 @@
                 </div>
             @endif
             @if($is_wind_speed || $is_gust_speed)
-                <div class="col-md-4">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -62,24 +82,8 @@
                     </div>
                 </div>
             @endif
-                @if($is_solar)
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6>Solar: <span v-cloak>@{{ solar }}</span> <sub>(hPa)</sub>
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="solar-chart" style="width: 100%;height: 300px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-        </div>
-
-        <div class="row mt-5">
             @if($is_rain_fall)
-                <div class="col-md-3">
+                <div class="col-6 col-lg-2">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -95,7 +99,7 @@
                 </div>
             @endif
             @if($is_uv)
-                <div class="col-md-3">
+                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -110,10 +114,24 @@
                     </div>
                 </div>
             @endif
+            @if($is_wind_direction)
+                <div class="col-12 col-lg-2 mb-2 mb-lg-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
+                                        style="font-size: 16px;">°</sup>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
-        <div class="row mt-5">
+        <div class="row mt-0 mt-lg-5">
             @if($is_atmospheric_pressure)
-                <div class="col-md-3">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
                             <h6>Atmospheric Pressure: <span v-cloak>@{{ atmospheric_pressure }}</span> <sub>(hPa)</sub>
@@ -126,7 +144,7 @@
                 </div>
             @endif
             @if($is_relative_humidity)
-                <div class="col-md-3">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
                             <h6>Relative Humidity: <span v-cloak>@{{ relative_humidity }}%</span></h6>
@@ -137,39 +155,232 @@
                     </div>
                 </div>
             @endif
-            @if($is_wind_direction)
-                <div class="col-md-3">
+            @if($is_solar)
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup style="font-size: 16px;">°</sup>
+                            <h6>Solar: <span v-cloak>@{{ solar }}</span> <sub>(hPa)</sub>
                             </h6>
                         </div>
                         <div class="card-body">
-                            <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
+                            <div id="solar-chart" style="width: 100%;height: 300px;"></div>
                         </div>
                     </div>
                 </div>
             @endif
-                @if($is_strikes || $is_strike_distance)
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6>Strikes: <span v-cloak>@{{ strikes }}</span></h6>
-                                    </div>
-                                    <div class="col-md-6 pull-right">
-                                        <h6>Strike Distance: <span v-cloak>@{{ strike_distance }}</span> <sub>(Km)</sub>
-                                        </h6>
-                                    </div>
+            @if($is_strikes || $is_strike_distance)
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Strikes: <span v-cloak>@{{ strikes }}</span></h6>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <h6>Strike Distance: <span v-cloak>@{{ strike_distance }}</span>
+                                        <sub>(Km)</sub>
+                                    </h6>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div id="strikes-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                        <div class="card-body">
+                            <div id="strikes-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+        <div class="row mt-0 mt-lg-5 mb-5">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            @if($is_rain_fall)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Today Rainfall</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-cloud-rain fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ rain_fall }}</span>
+                                            mm
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">This Month Rainfall</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-cloud-rain fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ monthly_rain_fall }}</span> mm
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">This Year Rainfall</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-cloud-rain fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ yearly_rain_fall }}</span> mm
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($is_relative_humidity)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Humidity Min</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-cloud-sun fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ humidity_min }}</span>%
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Humidity Max</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-cloud-sun fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ humidity_max }}</span>%
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($is_solar)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Solar Min</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-bolt fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ solar_min }}</span>
+                                            hpa
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Solar Max</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-bolt fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ solar_max }}</span>
+                                            hpa
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($is_gust_speed)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Guast Min</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-wind fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ gust_speed_min }}</span> m/s
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Guast Max</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-wind fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ gust_speed_max }}</span> m/s
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="mt-2 d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            @if($is_wind_speed)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Wind Min</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-wind fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ wind_speed_min }}</span> m/s
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Wind Max</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-wind fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ wind_speed_max }}</span> m/s
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($is_air_temp)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Temperature Min</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-temperature-low fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ air_temp_min }}<sup
+                                                        style="font-size: 16px;">°</sup></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Temperature Max</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-temperature-high fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ air_temp_max }}<sup
+                                                        style="font-size: 16px;">°</sup></span>
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">MSL Pressure Min</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-tire-pressure-warning fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">MSL Pressure Max</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-tire-pressure-warning fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Average PM1</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Average PM2.5</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Average PM4</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Average PM10</h6>
+                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                @endif
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -226,14 +437,26 @@
                 is_strikes: "{{ $is_strikes }}",
                 is_strike_distance: "{{ $is_strike_distance }}",
                 air_temp: '0',
+                air_temp_min: 0,
+                air_temp_max: 0,
                 wind_speed: '0',
+                wind_speed_min: 0,
+                wind_speed_max: 0,
                 gust_speed: '0',
+                gust_speed_min: 0,
+                gust_speed_max: 0,
                 rain_fall: '0',
+                monthly_rain_fall: 0,
+                yearly_rain_fall: 0,
                 uv: '0',
                 atmospheric_pressure: '0',
                 relative_humidity: '0',
+                humidity_min: 0,
+                humidity_max: 0,
                 wind_direction: '0',
                 solar: '0',
+                solar_min: 0,
+                solar_max: 0,
                 strikes: '0',
                 strike_distance: '0',
             },
@@ -256,6 +479,8 @@
                                 let airData = response.data.airTempData ? response.data.airTempData.data : 0;
                                 gaugeAirTemp.data([airData]);
                                 _this.air_temp = airData;
+                                _this.air_temp_min = response.data.airTempMinMax ? response.data.airTempMinMax.minData : 0;
+                                _this.air_temp_max = response.data.airTempMinMax ? response.data.airTempMinMax.maxData : 0;
                             }
                             if (_this.is_wind_speed || _this.is_gust_speed) {
                                 let windData = response.data.windSpeedData ? response.data.windSpeedData.data : 0;
@@ -263,11 +488,17 @@
                                 gaugeWindGustSpeed.data([windData, gustData]);
                                 _this.wind_speed = windData;
                                 _this.gust_speed = gustData;
+                                _this.wind_speed_min = response.data.windSpeedMinMax ? response.data.windSpeedMinMax.minData : 0;
+                                _this.wind_speed_max = response.data.windSpeedMinMax ? response.data.windSpeedMinMax.maxData : 0;
+                                _this.gust_speed_min = response.data.gustSpeedMinMax ? response.data.gustSpeedMinMax.minData : 0;
+                                _this.gust_speed_max = response.data.gustSpeedMinMax ? response.data.gustSpeedMinMax.maxData : 0;
                             }
                             if (_this.is_rain_fall) {
                                 let rainData = response.data.rainFallData ? response.data.rainFallData.data : 0;
                                 gaugeRainfall.data([rainData]);
                                 _this.rain_fall = rainData;
+                                _this.monthly_rain_fall = response.data.rainFallMonthData ? response.data.rainFallMonthData.data : 0;
+                                _this.yearly_rain_fall = response.data.rainFallYearData ? response.data.rainFallYearData.data : 0;
                             }
                             if (_this.is_uv) {
                                 let uvData = response.data.uvData ? response.data.uvData.data : 0;
@@ -284,6 +515,8 @@
                                 let humidityData = response.data.relativeHumidityData ? response.data.relativeHumidityData.data : 0;
                                 gaugeRelativeHumidity.data([humidityData]);
                                 _this.relative_humidity = humidityData;
+                                _this.humidity_min = response.data.humidityMinMax ? response.data.humidityMinMax.minData : 0;
+                                _this.humidity_max = response.data.humidityMinMax ? response.data.humidityMinMax.maxData : 0;
                             }
                             if (_this.is_wind_direction) {
                                 let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
@@ -294,6 +527,8 @@
                                 let solarData = response.data.solarData ? response.data.solarData.data : 0;
                                 gaugeSolar.data([solarData]);
                                 _this.solar = solarData;
+                                _this.solar_min = response.data.solarMinMax ? response.data.solarMinMax.minData : 0;
+                                _this.solar_max = response.data.solarMinMax ? response.data.solarMinMax.maxData : 0;
                             }
                             if (_this.is_strikes || _this.is_strike_distance) {
                                 let strikesData = response.data.strikesData ? response.data.strikesData.data : 0;

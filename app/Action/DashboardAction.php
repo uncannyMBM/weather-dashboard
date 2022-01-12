@@ -62,6 +62,19 @@ class DashboardAction
         return $sensorData;
     }
 
+    public function getMinMaxData($sensor, $timeBetween)
+    {
+        if (!isset($sensor['sensor']))
+            return null;
+        $sensorData = DB::table('base_station_sensors_data')
+            ->selectRaw('id ,sensors_id, MIN(D' . $sensor['key'] . ') AS minData, MAX(D' . $sensor['key'] . ') AS maxData')
+            ->where('sensors_id', $sensor['sensor']->id)
+            ->whereBetween('created_at', $timeBetween)
+            ->groupBy('sensors_id')
+            ->first();
+        return $sensorData;
+    }
+
     public function findSensorKey($sensors, $key)
     {
         if (!$sensors)
