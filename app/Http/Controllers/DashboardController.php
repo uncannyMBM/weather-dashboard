@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Action\DashboardAction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -33,6 +34,10 @@ class DashboardController extends Controller
             $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
             $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
             $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
+            $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+            $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+            $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+            $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
 
             $data['base'] = $base;
             $data['baseParams'] = $baseParams;
@@ -62,6 +67,10 @@ class DashboardController extends Controller
             $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
             $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
             $data['is_uv'] = isset($uvData['sensor']) ? true : false;
+            $data['is_avg_pm1'] = isset($avgPm1Data['sensor']) ? true : false;
+            $data['is_avg_pm25'] = isset($avgPm25Data['sensor']) ? true : false;
+            $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
+            $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
             return view('pages.dashboard', $data);
         } catch (\Exception $exception) {
             return back()->with('alert', $exception->getMessage());
@@ -77,6 +86,7 @@ class DashboardController extends Controller
         $timeOf8Am = Carbon::parse($today)->addHours(8)->addMinutes(59)->addSeconds(59);
         $today9Am = Carbon::parse($today)->addHours(9);
         $currentConvertedTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
+        $currentConvertedTimeStarDay = Carbon::createFromFormat('Y-m-d H:i:s', $localTime->startOfDay(), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime24hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHours(23)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime1hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHour()->setTimezone(config('app.timezone'))->toDateTimeString();
         $timeBetween = $localTime->gt($timeOf8Am) == false ? [
@@ -94,7 +104,7 @@ class DashboardController extends Controller
 
         if (isset($airTempData['sensor'])){
             $data['airTempData'] = $action->getLatestChartData($airTempData);
-            $data['airTempMinMax'] = $action->getMinMaxData($airTempData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['airTempMinMax'] = $action->getMinMaxData($airTempData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
 
@@ -102,7 +112,7 @@ class DashboardController extends Controller
 
         if (isset($windSpeedData['sensor'])) {
             $data['windSpeedData'] = $action->getLatestChartData($windSpeedData);
-            $data['windSpeedMinMax'] = $action->getMinMaxData($windSpeedData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['windSpeedMinMax'] = $action->getMinMaxData($windSpeedData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
 
@@ -110,7 +120,7 @@ class DashboardController extends Controller
 
         if (isset($gustSpeedData['sensor'])) {
             $data['gustSpeedData'] = $action->getLatestChartData($gustSpeedData);
-            $data['gustSpeedMinMax'] = $action->getMinMaxData($gustSpeedData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['gustSpeedMinMax'] = $action->getMinMaxData($gustSpeedData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
 
@@ -131,10 +141,13 @@ class DashboardController extends Controller
 
         if (!isset($atmosphericPressureData['sensor'])) {
             $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
-            if (isset($atmosphericPressureData['sensor']))
+            if (isset($atmosphericPressureData['sensor'])){
                 $data['atmosphericPressureData'] = $action->getLatestChartData($atmosphericPressureData);
+                $data['atmosphericPressureMinMax'] = $action->getMinMaxData($atmosphericPressureData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
+            }
         } else {
             $data['atmosphericPressureData'] = $action->getLatestChartData($atmosphericPressureData);
+            $data['pressureMinMax'] = $action->getMinMaxData($atmosphericPressureData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
         $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
@@ -143,10 +156,10 @@ class DashboardController extends Controller
             $relativeHumidityData = $action->findSensorKey($sensors, 'pressure_(hPa)');
             if (isset($relativeHumidityData['sensor']))
                 $data['relativeHumidityData'] = $action->getLatestChartData($relativeHumidityData);
-            $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         } else {
             $data['relativeHumidityData'] = $action->getLatestChartData($relativeHumidityData);
-            $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
 
@@ -159,7 +172,7 @@ class DashboardController extends Controller
 
         if (isset($solarData['sensor'])) {
             $data['solarData'] = $action->getLatestChartData($solarData);
-            $data['solarMinMax'] = $action->getMinMaxData($solarData, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['solarMinMax'] = $action->getMinMaxData($solarData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
         $strikesData = $action->findSensorKey($sensors, 'strikes');
@@ -171,6 +184,41 @@ class DashboardController extends Controller
 
         if (isset($strikeDistanceData['sensor']))
             $data['strikeDistanceData'] = $action->getLatestChartData($strikeDistanceData);
+
+        $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+        if (isset($avgPm1Data['sensor']))
+            $data['avgPm1Data'] = $action->getAvgData($avgPm1Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+
+        $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+        if (isset($avgPm25Data['sensor']))
+            $data['avgPm25Data'] = $action->getAvgData($avgPm25Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+
+        $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+        if (isset($avgPm4Data['sensor']))
+            $data['avgPm4Data'] = $action->getAvgData($avgPm4Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+
+        $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+        if (isset($avgPm10Data['sensor']))
+            $data['avgPm10Data'] = $action->getAvgData($avgPm10Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+
         return response()->json($data);
+    }
+
+    public function getAvgPmChartData(Request $request, DashboardAction $action)
+    {
+        $sensors = $action->getSensorData($request->id);
+        $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+        $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+        $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+        $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+        $avgData = DB::table('base_station_sensors_data')
+            ->selectRaw('id ,sensors_id, created_at, AVG(D' . $avgPm1Data['key'] . ') AS pm1, AVG(D' . $avgPm25Data['key'] . ') AS pm25, AVG(D' . $avgPm4Data['key'] . ') AS pm4, AVG(D' . $avgPm10Data['key'] . ') AS pm10')
+            ->where('sensors_id', $avgPm1Data['sensor']->id)
+            ->whereDate('created_at', '>=', Carbon::createFromFormat('d/m/Y', $request->dateData[0]))
+            ->whereDate('created_at', '<=', Carbon::createFromFormat('d/m/Y', $request->dateData[1]))
+            ->oldest()
+            ->groupBy([DB::raw("DATE_FORMAT(created_at, '%j')"), 'sensors_id'])
+            ->get();
+        return response()->json($avgData);
     }
 }

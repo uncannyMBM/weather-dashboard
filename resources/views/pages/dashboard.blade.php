@@ -2,7 +2,7 @@
 @push('extra_styles')
     <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
-
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
     <style>
         [v-cloak] {
             display: none;
@@ -329,59 +329,99 @@
                                     </div>
                                 </div>
                             @endif
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">MSL Pressure Min</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-tire-pressure-warning fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                            @if($is_atmospheric_pressure)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">MSL Pressure Min</h6>
+                                        <p class="card-text blue-text"><i
+                                                    class="fas fa-tire-pressure-warning fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ msl_pressure_min }}</span> hPa
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">MSL Pressure Max</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-tire-pressure-warning fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">MSL Pressure Max</h6>
+                                        <p class="card-text blue-text"><i
+                                                    class="fas fa-tire-pressure-warning fa-2x"></i>
+                                            <span class="ml-2" v-cloak
+                                                  style="font-size: 30px;">@{{ msl_pressure_max }}</span> hPa
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Average PM1</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                            @endif
+                            @if($is_avg_pm1)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Average PM1</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ avg_pm_1 }}</span>
+                                            µg/m³
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Average PM2.5</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                            @endif
+                            @if($is_avg_pm25)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Average PM2.5</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ avg_pm_25 }}</span>
+                                            µg/m³
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Average PM4</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                            @endif
+                            @if($is_avg_pm4)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Average PM4</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ avg_pm_4 }}</span>
+                                            µg/m³
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Average PM10</h6>
-                                    <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
-                                        <span class="ml-2" v-cloak style="font-size: 30px;">987</span>,654
-                                    </p>
+                            @endif
+                            @if($is_avg_pm10)
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Average PM10</h6>
+                                        <p class="card-text blue-text"><i class="fas fa-clock fa-2x"></i>
+                                            <span class="ml-2" v-cloak style="font-size: 30px;">@{{ avg_pm_10 }}</span>
+                                            µg/m³
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
+            <div class="row mt-0 mt-lg-5 mb-5">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Dust Monitor Average Mass</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="float-right" type="text" name="avg_mass_datepicker" value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="avg_mass_chart" style="width: 100%;height: 500px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
 @push('extra_scripts')
@@ -391,6 +431,7 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-linear-gauge.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     @if($is_air_temp)
         <script src="{{ asset('js/air-temparature.js') }}"></script>
     @endif
@@ -418,8 +459,58 @@
     @if($is_strikes || $is_strike_distance)
         <script src="{{ asset('js/strikes.js') }}"></script>
     @endif
+    @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
+        <script src="{{ asset('js/avg-mass-chart.js') }}"></script>
+    @endif
 @endpush
 @section('scripts')
+    @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
+        <script>
+            $(function () {
+                $('input[name="avg_mass_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
+
+                $('input[name="avg_mass_datepicker"]').daterangepicker({
+                    autoUpdateInput: false,
+                    startDate: moment().subtract(7, 'days'),
+                    endDate: moment(),
+                    minDate: moment().subtract(1, 'year'),
+                    maxDate: moment(),
+                    locale: {
+                        cancelLabel: 'Clear'
+                    }
+                });
+
+                $('input[name="avg_mass_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                    getAvgChartData();
+                });
+
+                function getAvgChartData() {
+                    let dateData = $('input[name="avg_mass_datepicker"]').val().split("-").map(item => item.trim());
+                    $.ajax({
+                        url: "{{ route('get.avg.pm.chart.data') }}",
+                        method: "GET",
+                        data: {dateData: dateData, id: "{{ $base->id }}"},
+                        success: function (response) {
+                            avgPmDataSet.remove();
+                            var agvData = [];
+                            response.forEach(function (value, key) {
+                                avgPmDataSet.insert([
+                                    moment(value.created_at).format('DD/MM/YYYY'),
+                                    value.pm1,
+                                    value.pm25,
+                                    value.pm4,
+                                    value.pm10
+                                ], key);
+                            });
+                        }
+                    });
+                }
+
+                getAvgChartData();
+            });
+        </script>
+    @endif
     <script>
         let newVue = new Vue({
             el: "#main-charts",
@@ -436,6 +527,10 @@
                 is_solar: "{{ $is_solar }}",
                 is_strikes: "{{ $is_strikes }}",
                 is_strike_distance: "{{ $is_strike_distance }}",
+                is_avg_pm1: "{{ $is_avg_pm1 }}",
+                is_avg_pm25: "{{ $is_avg_pm25 }}",
+                is_avg_pm4: "{{ $is_avg_pm4 }}",
+                is_avg_pm10: "{{ $is_avg_pm10 }}",
                 air_temp: '0',
                 air_temp_min: 0,
                 air_temp_max: 0,
@@ -450,6 +545,8 @@
                 yearly_rain_fall: 0,
                 uv: '0',
                 atmospheric_pressure: '0',
+                msl_pressure_min: 0,
+                msl_pressure_max: 0,
                 relative_humidity: '0',
                 humidity_min: 0,
                 humidity_max: 0,
@@ -459,8 +556,12 @@
                 solar_max: 0,
                 strikes: '0',
                 strike_distance: '0',
+                avg_pm_1: 0,
+                avg_pm_25: 0,
+                avg_pm_4: 0,
+                avg_pm_10: 0,
             },
-            beforeMount() {
+            mounted() {
                 this.getChartData();
             },
             methods: {
@@ -509,6 +610,8 @@
                                 let atmostphericData = response.data.atmosphericPressureData ? response.data.atmosphericPressureData.data : 0;
                                 gaugeAtmosphericPressure.data([atmostphericData]);
                                 _this.atmospheric_pressure = atmostphericData;
+                                _this.msl_pressure_min = response.data.pressureMinMax ? response.data.pressureMinMax.minData : 0;
+                                _this.msl_pressure_max = response.data.pressureMinMax ? response.data.pressureMinMax.maxData : 0;
 
                             }
                             if (_this.is_relative_humidity) {
@@ -536,6 +639,18 @@
                                 gaugeStrikes.data([strikesData]);
                                 _this.strikes = strikesData;
                                 _this.strike_distance = strikeDistanceData;
+                            }
+                            if (_this.is_avg_pm1) {
+                                _this.avg_pm_1 = response.data.avgPm1Data ? response.data.avgPm1Data.avgData : 0;
+                            }
+                            if (_this.is_avg_pm25) {
+                                _this.avg_pm_25 = response.data.avgPm25Data ? response.data.avgPm25Data.avgData : 0;
+                            }
+                            if (_this.is_avg_pm4) {
+                                _this.avg_pm_4 = response.data.avgPm4Data ? response.data.avgPm4Data.avgData : 0;
+                            }
+                            if (_this.is_avg_pm10) {
+                                _this.avg_pm_10 = response.data.avgPm10Data ? response.data.avgPm10Data.avgData : 0;
                             }
                         });
                 },
