@@ -451,7 +451,7 @@
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Dust Monitor Solar and Battery Voltage</h6>
+                                    <h6>Solar and Battery Voltage</h6>
                                 </div>
                                 <div class="col-md-6">
                                     <input class="float-right" type="text" name="solar_voltage_datepicker" value=""
@@ -473,7 +473,7 @@
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Dust Monitor Solar and UV</h6>
+                                    <h6>Solar and UV</h6>
                                 </div>
                                 <div class="col-md-6">
                                     <input class="float-right" type="text" name="solar_uv_datepicker" value=""
@@ -805,17 +805,26 @@
                                 xAxis: {
                                     type: 'datetime',
                                 },
-                                yAxis: {
-                                    title: {
-                                        text: 'Solar and Battery Voltage'
-                                    },
-                                },
+                                yAxis: [
+                                    {
+                                        title: {
+                                            text: 'Solar'
+                                        },
+                                    }, {
+                                        title: {
+                                            text: 'Battery Voltage'
+                                        },
+                                        opposite: true
+                                    }
+                                ],
                                 colors: ['#1abc9c', '#9b59b6'],
                                 series: [{
+                                    yAxis: 0,
                                     data: response.solar,
                                     lineWidth: 0.5,
                                     name: 'solar_(W/m²)'
                                 },{
+                                    yAxis: 1,
                                     data: response.voltage,
                                     lineWidth: 0.5,
                                     name: 'battery_voltage'
@@ -884,17 +893,24 @@
                                 xAxis: {
                                     type: 'datetime',
                                 },
-                                yAxis: {
+                                yAxis:[{
                                     title: {
-                                        text: 'Solar and UV'
+                                        text: 'Solar'
                                     },
-                                },
+                                },{
+                                    title: {
+                                        text: 'UV'
+                                    },
+                                    opposite: true
+                                }],
                                 colors: ['#1abc9c', '#9b59b6'],
                                 series: [{
+                                    yAxis:0,
                                     data: response.solar,
                                     lineWidth: 0.5,
                                     name: 'solar_(W/m²)'
                                 },{
+                                    yAxis:1,
                                     data: response.uv,
                                     lineWidth: 0.5,
                                     name: 'uv_index'
