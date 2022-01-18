@@ -666,10 +666,10 @@
 
                 $('input[name="max_mass_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
                     $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                    getAvgChartData();
+                    getMaxChartData();
                 });
 
-                function getAvgChartData() {
+                function getMaxChartData() {
                     Notiflix.Block.dots('.max_mass_chart_loader');
                     let dateData = $('input[name="max_mass_datepicker"]').val().split("-").map(item => item.trim());
                     $.ajax({
@@ -748,7 +748,7 @@
                     });
                 }
 
-                getAvgChartData();
+                getMaxChartData();
             });
         </script>
     @endif
@@ -771,10 +771,10 @@
 
                 $('input[name="solar_voltage_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
                     $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                    getAvgChartData();
+                    getSolarBatteryChartData();
                 });
 
-                function getAvgChartData() {
+                function getSolarBatteryChartData() {
                     Notiflix.Block.dots('.solar_voltage_chart_loader');
                     let dateData = $('input[name="solar_voltage_datepicker"]').val().split("-").map(item => item.trim());
                     $.ajax({
@@ -818,7 +818,7 @@
                                 },{
                                     data: response.voltage,
                                     lineWidth: 0.5,
-                                    name: 'voltage_(V)'
+                                    name: 'battery_voltage'
                                 }]
                             });
 
@@ -827,7 +827,7 @@
                     });
                 }
 
-                getAvgChartData();
+                getSolarBatteryChartData();
             });
         </script>
     @endif
@@ -850,10 +850,10 @@
 
                 $('input[name="solar_uv_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
                     $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                    getAvgChartData();
+                    getSolarUVChartData();
                 });
 
-                function getAvgChartData() {
+                function getSolarUVChartData() {
                     Notiflix.Block.dots('.solar_uv_chart_loader');
                     let dateData = $('input[name="solar_uv_datepicker"]').val().split("-").map(item => item.trim());
                     $.ajax({
@@ -906,7 +906,7 @@
                     });
                 }
 
-                getAvgChartData();
+                getSolarUVChartData();
             });
         </script>
     @endif
