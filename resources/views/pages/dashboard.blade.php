@@ -8,7 +8,7 @@
             display: none;
         }
 
-        .anychart-credits {
+        .anychart-credits, .highcharts-credits {
             display: none !important;
         }
     </style>
@@ -400,10 +400,10 @@
                 </div>
             </div>
         </div>
-        @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
+        @if($is_avg_pm1 || $is_avg_pm25 || $is_avg_pm4 || $is_avg_pm10)
             <div class="row mt-0 mt-lg-5 mb-5">
                 <div class="col-md-12">
-                    <div class="card">
+                    <div class="card avg_mass_chart_loader">
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-6">
@@ -422,6 +422,72 @@
                 </div>
             </div>
         @endif
+        @if($is_max_pm1 || $is_max_pm25 || $is_max_pm4 || $is_max_pm10)
+            <div class="row mt-0 mt-lg-5 mb-5">
+                <div class="col-md-12">
+                    <div class="card max_mass_chart_loader">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Dust Monitor Max Mass</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="float-right" type="text" name="max_mass_datepicker" value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="max_mass_chart" style="width: 100%;height: 500px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+        @if($is_solar && $is_voltage)
+            <div class="row mt-0 mt-lg-5 mb-5">
+                <div class="col-md-12">
+                    <div class="card solar_voltage_chart_loader">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Dust Monitor Solar and Voltage</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="float-right" type="text" name="solar_voltage_datepicker" value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="solar_voltage_chart" style="width: 100%;height: 500px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+        @if($is_solar && $is_uv)
+            <div class="row mt-0 mt-lg-5 mb-5">
+                <div class="col-md-12">
+                    <div class="card solar_uv_chart_loader">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Dust Monitor Solar and UV</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="float-right" type="text" name="solar_uv_datepicker" value=""
+                                           readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="solar_uv_chart" style="width: 100%;height: 500px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
 @push('extra_scripts')
@@ -431,6 +497,10 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-linear-gauge.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/boost.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     @if($is_air_temp)
         <script src="{{ asset('js/air-temparature.js') }}"></script>
@@ -459,14 +529,18 @@
     @if($is_strikes || $is_strike_distance)
         <script src="{{ asset('js/strikes.js') }}"></script>
     @endif
-    @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
-        <script src="{{ asset('js/avg-mass-chart.js') }}"></script>
-    @endif
 @endpush
 @section('scripts')
-    @if($is_avg_pm1 && $is_avg_pm25 && $is_avg_pm4 && $is_avg_pm10)
+    <script>
+        let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    </script>
+    @if($is_avg_pm1 || $is_avg_pm25 || $is_avg_pm4 || $is_avg_pm10)
         <script>
             $(function () {
+                let pm1Series = "{{ $is_avg_pm1 }}";
+                let pm25Series = "{{ $is_avg_pm25 }}";
+                let pm4Series = "{{ $is_avg_pm4 }}";
+                let pm10Series = "{{ $is_avg_pm10 }}";
                 $('input[name="avg_mass_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
 
                 $('input[name="avg_mass_datepicker"]').daterangepicker({
@@ -475,6 +549,7 @@
                     endDate: moment(),
                     minDate: moment().subtract(1, 'year'),
                     maxDate: moment(),
+                    showDropdowns: true,
                     locale: {
                         cancelLabel: 'Clear'
                     }
@@ -486,23 +561,347 @@
                 });
 
                 function getAvgChartData() {
+                    Notiflix.Block.dots('.avg_mass_chart_loader');
                     let dateData = $('input[name="avg_mass_datepicker"]').val().split("-").map(item => item.trim());
                     $.ajax({
                         url: "{{ route('get.avg.pm.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, id: "{{ $base->id }}"},
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
                         success: function (response) {
-                            avgPmDataSet.remove();
-                            var agvData = [];
-                            response.forEach(function (value, key) {
-                                avgPmDataSet.insert([
-                                    moment(value.created_at).format('DD/MM/YYYY'),
-                                    value.pm1,
-                                    value.pm25,
-                                    value.pm4,
-                                    value.pm10
-                                ], key);
+                            let pmSeries = [];
+                            let pmColors = [];
+                            if (pm1Series){
+                                pmColors.push('#1abc9c');
+                                pmSeries.push({
+                                    data: response.pm1,
+                                    lineWidth: 0.5,
+                                    name: 'PM 1.0'
+                                });
+                            }
+                            if (pm25Series) {
+                                pmColors.push('#9b59b6');
+                                pmSeries.push({
+                                    data: response.pm25,
+                                    lineWidth: 0.5,
+                                    name: 'PM 2.5'
+                                });
+                            }
+                            if (pm4Series) {
+                                pmColors.push('#f39c12');
+                                pmSeries.push({
+                                    data: response.pm4,
+                                    lineWidth: 0.5,
+                                    name: 'PM 4.0'
+                                });
+                            }
+                            if (pm10Series) {
+                                pmColors.push('#e74c3c');
+                                pmSeries.push({
+                                    data: response.pm10,
+                                    lineWidth: 0.5,
+                                    name: 'PM 10.0'
+                                });
+                            }
+                            Highcharts.chart('avg_mass_chart', {
+                                chart: {
+                                    zoomType: 'x'
+                                },
+                                title: {
+                                    text: ''
+                                },
+                                tooltip: {
+                                    valueDecimals: 2,
+                                    dateTimeLabelFormats: {
+                                        day: "%A, %b %e, %Y, %H:%M"
+                                    },
+                                    formatter: function () {
+                                        var tt = '',
+                                            newDate = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.key);
+                                        tt = '<b>' + newDate + '</b> <br/><br/>' + '<b>' + this.series.name + ': </b>' + this.y;
+                                        return tt;
+                                    }
+                                },
+
+                                xAxis: {
+                                    type: 'datetime',
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'Avrage Mass Concentration (µg/m³)'
+                                    },
+                                },
+                                colors: pmColors,
+                                series: pmSeries
                             });
+
+                            Notiflix.Block.remove('.avg_mass_chart_loader');
+                        }
+                    });
+                }
+
+                getAvgChartData();
+            });
+        </script>
+    @endif
+    @if($is_max_pm1 || $is_max_pm25 || $is_max_pm4 || $is_max_pm10)
+        <script>
+            $(function () {
+                let pm1Series = "{{ $is_max_pm1 }}";
+                let pm25Series = "{{ $is_max_pm25 }}";
+                let pm4Series = "{{ $is_max_pm4 }}";
+                let pm10Series = "{{ $is_max_pm10 }}";
+                $('input[name="max_mass_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
+
+                $('input[name="max_mass_datepicker"]').daterangepicker({
+                    autoUpdateInput: false,
+                    startDate: moment().subtract(7, 'days'),
+                    endDate: moment(),
+                    minDate: moment().subtract(1, 'year'),
+                    maxDate: moment(),
+                    showDropdowns: true,
+                    locale: {
+                        cancelLabel: 'Clear'
+                    }
+                });
+
+                $('input[name="max_mass_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                    getAvgChartData();
+                });
+
+                function getAvgChartData() {
+                    Notiflix.Block.dots('.max_mass_chart_loader');
+                    let dateData = $('input[name="max_mass_datepicker"]').val().split("-").map(item => item.trim());
+                    $.ajax({
+                        url: "{{ route('get.max.pm.chart.data') }}",
+                        method: "GET",
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        success: function (response) {
+                            let pmSeries = [];
+                            let pmColors = [];
+                            if (pm1Series){
+                                pmColors.push('#1abc9c');
+                                pmSeries.push({
+                                    data: response.pm1,
+                                    lineWidth: 0.5,
+                                    name: 'PM 1.0'
+                                });
+                            }
+                            if (pm25Series) {
+                                pmColors.push('#9b59b6');
+                                pmSeries.push({
+                                    data: response.pm25,
+                                    lineWidth: 0.5,
+                                    name: 'PM 2.5'
+                                });
+                            }
+                            if (pm4Series) {
+                                pmColors.push('#f39c12');
+                                pmSeries.push({
+                                    data: response.pm4,
+                                    lineWidth: 0.5,
+                                    name: 'PM 4.0'
+                                });
+                            }
+                            if (pm10Series) {
+                                pmColors.push('#e74c3c');
+                                pmSeries.push({
+                                    data: response.pm10,
+                                    lineWidth: 0.5,
+                                    name: 'PM 10.0'
+                                });
+                            }
+                            Highcharts.chart('max_mass_chart', {
+                                chart: {
+                                    zoomType: 'x'
+                                },
+                                title: {
+                                    text: ''
+                                },
+                                tooltip: {
+                                    valueDecimals: 2,
+                                    dateTimeLabelFormats: {
+                                        day: "%A, %b %e, %Y, %H:%M"
+                                    },
+                                    formatter: function () {
+                                        var tt = '',
+                                            newDate = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.key);
+                                        tt = '<b>' + newDate + '</b> <br/><br/>' + '<b>' + this.series.name + ': </b>' + this.y;
+                                        return tt;
+                                    }
+                                },
+
+                                xAxis: {
+                                    type: 'datetime',
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'Max Mass Concentration (µg/m³)'
+                                    },
+                                },
+                                colors: pmColors,
+                                series: pmSeries
+                            });
+
+                            Notiflix.Block.remove('.max_mass_chart_loader');
+                        }
+                    });
+                }
+
+                getAvgChartData();
+            });
+        </script>
+    @endif
+    @if($is_solar && $is_voltage)
+        <script>
+            $(function () {
+                $('input[name="solar_voltage_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
+
+                $('input[name="solar_voltage_datepicker"]').daterangepicker({
+                    autoUpdateInput: false,
+                    startDate: moment().subtract(7, 'days'),
+                    endDate: moment(),
+                    minDate: moment().subtract(1, 'year'),
+                    maxDate: moment(),
+                    showDropdowns: true,
+                    locale: {
+                        cancelLabel: 'Clear'
+                    }
+                });
+
+                $('input[name="solar_voltage_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                    getAvgChartData();
+                });
+
+                function getAvgChartData() {
+                    Notiflix.Block.dots('.solar_voltage_chart_loader');
+                    let dateData = $('input[name="solar_voltage_datepicker"]').val().split("-").map(item => item.trim());
+                    $.ajax({
+                        url: "{{ route('get.solar.voltage.chart.data') }}",
+                        method: "GET",
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        success: function (response) {
+                            Highcharts.chart('solar_voltage_chart', {
+                                chart: {
+                                    zoomType: 'x'
+                                },
+                                title: {
+                                    text: ''
+                                },
+                                tooltip: {
+                                    valueDecimals: 2,
+                                    dateTimeLabelFormats: {
+                                        day: "%A, %b %e, %Y, %H:%M"
+                                    },
+                                    formatter: function () {
+                                        var tt = '',
+                                            newDate = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.key);
+                                        tt = '<b>' + newDate + '</b> <br/><br/>' + '<b>' + this.series.name + ': </b>' + this.y;
+                                        return tt;
+                                    }
+                                },
+
+                                xAxis: {
+                                    type: 'datetime',
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'Solar and Voltage'
+                                    },
+                                },
+                                colors: ['#1abc9c', '#9b59b6'],
+                                series: [{
+                                    data: response.solar,
+                                    lineWidth: 0.5,
+                                    name: 'solar_(W/m²)'
+                                },{
+                                    data: response.voltage,
+                                    lineWidth: 0.5,
+                                    name: 'voltage_(V)'
+                                }]
+                            });
+
+                            Notiflix.Block.remove('.solar_voltage_chart_loader');
+                        }
+                    });
+                }
+
+                getAvgChartData();
+            });
+        </script>
+    @endif
+    @if($is_solar && $is_uv)
+        <script>
+            $(function () {
+                $('input[name="solar_uv_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
+
+                $('input[name="solar_uv_datepicker"]').daterangepicker({
+                    autoUpdateInput: false,
+                    startDate: moment().subtract(7, 'days'),
+                    endDate: moment(),
+                    minDate: moment().subtract(1, 'year'),
+                    maxDate: moment(),
+                    showDropdowns: true,
+                    locale: {
+                        cancelLabel: 'Clear'
+                    }
+                });
+
+                $('input[name="solar_uv_datepicker"]').on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                    getAvgChartData();
+                });
+
+                function getAvgChartData() {
+                    Notiflix.Block.dots('.solar_uv_chart_loader');
+                    let dateData = $('input[name="solar_uv_datepicker"]').val().split("-").map(item => item.trim());
+                    $.ajax({
+                        url: "{{ route('get.solar.uv.chart.data') }}",
+                        method: "GET",
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        success: function (response) {
+                            Highcharts.chart('solar_uv_chart', {
+                                chart: {
+                                    zoomType: 'x'
+                                },
+                                title: {
+                                    text: ''
+                                },
+                                tooltip: {
+                                    valueDecimals: 2,
+                                    dateTimeLabelFormats: {
+                                        day: "%A, %b %e, %Y, %H:%M"
+                                    },
+                                    formatter: function () {
+                                        var tt = '',
+                                            newDate = Highcharts.dateFormat('%d/%m/%Y %H:%M:%S', this.key);
+                                        tt = '<b>' + newDate + '</b> <br/><br/>' + '<b>' + this.series.name + ': </b>' + this.y;
+                                        return tt;
+                                    }
+                                },
+
+                                xAxis: {
+                                    type: 'datetime',
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'Solar and UV'
+                                    },
+                                },
+                                colors: ['#1abc9c', '#9b59b6'],
+                                series: [{
+                                    data: response.solar,
+                                    lineWidth: 0.5,
+                                    name: 'solar_(W/m²)'
+                                },{
+                                    data: response.uv,
+                                    lineWidth: 0.5,
+                                    name: 'uv_index'
+                                }]
+                            });
+
+                            Notiflix.Block.remove('.solar_uv_chart_loader');
                         }
                     });
                 }

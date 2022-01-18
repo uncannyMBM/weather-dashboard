@@ -32,12 +32,17 @@ class DashboardController extends Controller
             $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
             $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
             $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
+            $voltageSensorsData = $action->findSensorKey($sensors, 'voltage_(V)');
             $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
             $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
             $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
             $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
             $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
             $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+            $maxPm1Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm1.0_(µg/m³)');
+            $maxPm25Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm2.5_(µg/m³)');
+            $maxPm4Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm4.0_(µg/m³)');
+            $maxPm10Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm10.0_(µg/m³)');
 
             $data['base'] = $base;
             $data['baseParams'] = $baseParams;
@@ -64,6 +69,7 @@ class DashboardController extends Controller
             $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
             $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
             $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
+            $data['is_voltage'] = isset($voltageSensorsData['sensor']) ? true : false;
             $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
             $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
             $data['is_uv'] = isset($uvData['sensor']) ? true : false;
@@ -71,6 +77,10 @@ class DashboardController extends Controller
             $data['is_avg_pm25'] = isset($avgPm25Data['sensor']) ? true : false;
             $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
             $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
+            $data['is_max_pm1'] = isset($maxPm1Data['sensor']) ? true : false;
+            $data['is_max_pm25'] = isset($maxPm25Data['sensor']) ? true : false;
+            $data['is_max_pm4'] = isset($maxPm4Data['sensor']) ? true : false;
+            $data['is_max_pm10'] = isset($maxPm10Data['sensor']) ? true : false;
             return view('pages.dashboard', $data);
         } catch (\Exception $exception) {
             return back()->with('alert', $exception->getMessage());
@@ -86,7 +96,7 @@ class DashboardController extends Controller
         $timeOf8Am = Carbon::parse($today)->addHours(8)->addMinutes(59)->addSeconds(59);
         $today9Am = Carbon::parse($today)->addHours(9);
         $currentConvertedTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
-        $currentConvertedTimeStarDay = Carbon::createFromFormat('Y-m-d H:i:s', $localTime->startOfDay(), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
+        $currentConvertedTimeStarDay = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::parse($request->currentTime)->startOfDay(), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime24hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHours(23)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime1hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHour()->setTimezone(config('app.timezone'))->toDateTimeString();
         $timeBetween = $localTime->gt($timeOf8Am) == false ? [
@@ -102,7 +112,7 @@ class DashboardController extends Controller
 
         $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
 
-        if (isset($airTempData['sensor'])){
+        if (isset($airTempData['sensor'])) {
             $data['airTempData'] = $action->getLatestChartData($airTempData);
             $data['airTempMinMax'] = $action->getMinMaxData($airTempData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
@@ -141,7 +151,7 @@ class DashboardController extends Controller
 
         if (!isset($atmosphericPressureData['sensor'])) {
             $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
-            if (isset($atmosphericPressureData['sensor'])){
+            if (isset($atmosphericPressureData['sensor'])) {
                 $data['atmosphericPressureData'] = $action->getLatestChartData($atmosphericPressureData);
                 $data['atmosphericPressureMinMax'] = $action->getMinMaxData($atmosphericPressureData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
             }
@@ -153,7 +163,7 @@ class DashboardController extends Controller
         $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
 
         if (!isset($relativeHumidityData['sensor'])) {
-            $relativeHumidityData = $action->findSensorKey($sensors, 'pressure_(hPa)');
+            $relativeHumidityData = $action->findSensorKey($sensors, 'humidity_(%)');
             if (isset($relativeHumidityData['sensor']))
                 $data['relativeHumidityData'] = $action->getLatestChartData($relativeHumidityData);
             $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
@@ -206,19 +216,146 @@ class DashboardController extends Controller
 
     public function getAvgPmChartData(Request $request, DashboardAction $action)
     {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
         $sensors = $action->getSensorData($request->id);
         $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
         $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
         $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
         $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+        $sensorId = isset($avgPm1Data['sensor']) ? $avgPm1Data['sensor']->id : (isset($avgPm25Data['sensor']) ? $avgPm25Data['sensor']->id : (isset($avgPm4Data['sensor']) ? $avgPm4Data['sensor']->id : $avgPm10Data['sensor']->id));
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($avgPm1Data['key']) ? ', D' . $avgPm1Data['key'] . ' AS pm1' : '';
+        $coulms .= !empty($avgPm25Data['key']) ? ', D' . $avgPm25Data['key'] . ' AS pm25' : '';
+        $coulms .= !empty($avgPm4Data['key']) ? ', D' . $avgPm4Data['key'] . ' AS pm4' : '';
+        $coulms .= !empty($avgPm10Data['key']) ? ', D' . $avgPm10Data['key'] . ' AS pm10' : '';
+
         $avgData = DB::table('base_station_sensors_data')
-            ->selectRaw('id ,sensors_id, created_at, AVG(D' . $avgPm1Data['key'] . ') AS pm1, AVG(D' . $avgPm25Data['key'] . ') AS pm25, AVG(D' . $avgPm4Data['key'] . ') AS pm4, AVG(D' . $avgPm10Data['key'] . ') AS pm10')
-            ->where('sensors_id', $avgPm1Data['sensor']->id)
-            ->whereDate('created_at', '>=', Carbon::createFromFormat('d/m/Y', $request->dateData[0]))
-            ->whereDate('created_at', '<=', Carbon::createFromFormat('d/m/Y', $request->dateData[1]))
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
             ->oldest()
-            ->groupBy([DB::raw("DATE_FORMAT(created_at, '%j')"), 'sensors_id'])
             ->get();
-        return response()->json($avgData);
+
+        $pm1 = [];
+        $pm25 = [];
+        $pm4 = [];
+        $pm10 = [];
+        foreach ($avgData as $avg) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $avg->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $pm1[] = [$labels, isset($avg->pm1) ? floatval($avg->pm1) : ''];
+            $pm25[] = [$labels, isset($avg->pm25) ? floatval($avg->pm25) : ''];
+            $pm4[] = [$labels, isset($avg->pm4) ? floatval($avg->pm4) : ''];
+            $pm10[] = [$labels, isset($avg->pm10) ? floatval($avg->pm10) : ''];
+        }
+        $data['pm1'] = $pm1;
+        $data['pm25'] = $pm25;
+        $data['pm4'] = $pm4;
+        $data['pm10'] = $pm10;
+        return response()->json($data);
+    }
+
+    public function getMaxPmChartData(Request $request, DashboardAction $action)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $maxPm1Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm1.0_(µg/m³)');
+        $maxPm25Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm2.5_(µg/m³)');
+        $maxPm4Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm4.0_(µg/m³)');
+        $maxPm10Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm10.0_(µg/m³)');
+        $sensorId = isset($maxPm1Data['sensor']) ? $maxPm1Data['sensor']->id : (isset($maxPm25Data['sensor']) ? $maxPm25Data['sensor']->id : (isset($maxPm4Data['sensor']) ? $maxPm4Data['sensor']->id : $maxPm10Data['sensor']->id));
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($maxPm1Data['key']) ? ', D' . $maxPm1Data['key'] . ' AS pm1' : '';
+        $coulms .= !empty($maxPm25Data['key']) ? ', D' . $maxPm25Data['key'] . ' AS pm25' : '';
+        $coulms .= !empty($maxPm4Data['key']) ? ', D' . $maxPm4Data['key'] . ' AS pm4' : '';
+        $coulms .= !empty($maxPm10Data['key']) ? ', D' . $maxPm10Data['key'] . ' AS pm10' : '';
+
+        $maxData = DB::table('base_station_sensors_data')
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $pm1 = [];
+        $pm25 = [];
+        $pm4 = [];
+        $pm10 = [];
+        foreach ($maxData as $max) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $max->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $pm1[] = [$labels, isset($max->pm1) ? floatval($max->pm1) : ''];
+            $pm25[] = [$labels, isset($max->pm25) ? floatval($max->pm25) : ''];
+            $pm4[] = [$labels, isset($max->pm4) ? floatval($max->pm4) : ''];
+            $pm10[] = [$labels, isset($max->pm10) ? floatval($max->pm10) : ''];
+        }
+        $data['pm1'] = $pm1;
+        $data['pm25'] = $pm25;
+        $data['pm4'] = $pm4;
+        $data['pm10'] = $pm10;
+        return response()->json($data);
+    }
+
+    public function getSolarVoltageChartData(Request $request, DashboardAction $action)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $solarData = $action->findSensorKey($sensors, 'solar_(W/m²)');
+        $voltageData = $action->findSensorKey($sensors, 'voltage_(V)');
+        $sensorId = isset($solarData['sensor']) ? $solarData['sensor']->id : $voltageData['sensor']->id;
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($solarData['key']) ? ', D' . $solarData['key'] . ' AS solar' : '';
+        $coulms .= !empty($voltageData['key']) ? ', D' . $voltageData['key'] . ' AS voltage' : '';
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $solar = [];
+        $voltage = [];
+
+        foreach ($allData as $singleData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : 0];
+            $voltage[] = [$labels, isset($singleData->voltage) ? floatval($singleData->voltage) : 0];
+        }
+        $data['solar'] = $solar;
+        $data['voltage'] = $voltage;
+        return response()->json($data);
+    }
+
+    public function getSolarUvChartData(Request $request, DashboardAction $action)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $solarData = $action->findSensorKey($sensors, 'solar_(W/m²)');
+        $uvData = $action->findSensorKey($sensors, 'uv_index');
+        $sensorId = isset($solarData['sensor']) ? $solarData['sensor']->id : $uvData['sensor']->id;
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($solarData['key']) ? ', D' . $solarData['key'] . ' AS solar' : 0;
+        $coulms .= !empty($uvData['key']) ? ', D' . $uvData['key'] . ' AS uv' : 0;
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $solar = [];
+        $uv = [];
+        foreach ($allData as $singleData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : ''];
+            $uv[] = [$labels, isset($singleData->uv) ? floatval($singleData->uv) : ''];
+        }
+        $data['solar'] = $solar;
+        $data['uv'] = $uv;
+        return response()->json($data);
     }
 }
