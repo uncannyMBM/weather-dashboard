@@ -444,14 +444,14 @@
                 </div>
             </div>
         @endif
-        @if($is_solar && $is_voltage)
+        @if($is_solar)
             <div class="row mt-0 mt-lg-5 mb-5">
                 <div class="col-md-12">
                     <div class="card solar_voltage_chart_loader">
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Dust Monitor Solar and Voltage</h6>
+                                    <h6>Dust Monitor Solar and Battery Voltage</h6>
                                 </div>
                                 <div class="col-md-6">
                                     <input class="float-right" type="text" name="solar_voltage_datepicker" value=""
@@ -752,7 +752,7 @@
             });
         </script>
     @endif
-    @if($is_solar && $is_voltage)
+    @if($is_solar)
         <script>
             $(function () {
                 $('input[name="solar_voltage_datepicker"]').val(moment().subtract(7, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));

@@ -32,7 +32,6 @@ class DashboardController extends Controller
             $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
             $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
             $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
-            $voltageSensorsData = $action->findSensorKey($sensors, 'voltage_(V)');
             $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
             $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
             $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
@@ -69,7 +68,6 @@ class DashboardController extends Controller
             $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
             $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
             $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
-            $data['is_voltage'] = isset($voltageSensorsData['sensor']) ? true : false;
             $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
             $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
             $data['is_uv'] = isset($uvData['sensor']) ? true : false;
@@ -302,15 +300,20 @@ class DashboardController extends Controller
         $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
         $sensors = $action->getSensorData($request->id);
         $solarData = $action->findSensorKey($sensors, 'solar_(W/m²)');
-        $voltageData = $action->findSensorKey($sensors, 'voltage_(V)');
-        $sensorId = isset($solarData['sensor']) ? $solarData['sensor']->id : $voltageData['sensor']->id;
+        $sensorId = $solarData['sensor']->id;
         $coulms = 'id, sensors_id, created_at';
         $coulms .= !empty($solarData['key']) ? ', D' . $solarData['key'] . ' AS solar' : '';
-        $coulms .= !empty($voltageData['key']) ? ', D' . $voltageData['key'] . ' AS voltage' : '';
 
-        $allData = DB::table('base_station_sensors_data')
+        $allSolarData = DB::table('base_station_sensors_data')
             ->selectRaw($coulms)
             ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $allBatteriesData = DB::table('base_station_parameters')
+            ->selectRaw('id, base_station_id, created_at, battery_voltage AS voltage')
+            ->where('base_station_id', $request->id)
             ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
             ->oldest()
             ->get();
@@ -318,10 +321,14 @@ class DashboardController extends Controller
         $solar = [];
         $voltage = [];
 
-        foreach ($allData as $singleData) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
-            $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : 0];
-            $voltage[] = [$labels, isset($singleData->voltage) ? floatval($singleData->voltage) : 0];
+        foreach ($allSolarData as $singleSolarData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleSolarData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $solar[] = [$labels, isset($singleSolarData->solar) ? floatval($singleSolarData->solar) : 0];
+        }
+
+        foreach ($allBatteriesData as $singleBatteryData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleBatteryData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $voltage[] = [$labels, isset($singleBatteryData->voltage) ? floatval($singleBatteryData->voltage) : 0];
         }
         $data['solar'] = $solar;
         $data['voltage'] = $voltage;
