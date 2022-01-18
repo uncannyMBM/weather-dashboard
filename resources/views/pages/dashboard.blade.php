@@ -807,7 +807,7 @@
                                 },
                                 yAxis: {
                                     title: {
-                                        text: 'Solar and Voltage'
+                                        text: 'Solar and Battery Voltage'
                                     },
                                 },
                                 colors: ['#1abc9c', '#9b59b6'],
