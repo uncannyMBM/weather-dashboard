@@ -240,7 +240,7 @@ class DashboardController extends Controller
         $pm4 = [];
         $pm10 = [];
         foreach ($avgData as $avg) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $avg->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $avg->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $pm1[] = [$labels, isset($avg->pm1) ? floatval($avg->pm1) : ''];
             $pm25[] = [$labels, isset($avg->pm25) ? floatval($avg->pm25) : ''];
             $pm4[] = [$labels, isset($avg->pm4) ? floatval($avg->pm4) : ''];
@@ -281,7 +281,7 @@ class DashboardController extends Controller
         $pm4 = [];
         $pm10 = [];
         foreach ($maxData as $max) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $max->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $max->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $pm1[] = [$labels, isset($max->pm1) ? floatval($max->pm1) : ''];
             $pm25[] = [$labels, isset($max->pm25) ? floatval($max->pm25) : ''];
             $pm4[] = [$labels, isset($max->pm4) ? floatval($max->pm4) : ''];
@@ -322,12 +322,12 @@ class DashboardController extends Controller
         $voltage = [];
 
         foreach ($allSolarData as $singleSolarData) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleSolarData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleSolarData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $solar[] = [$labels, isset($singleSolarData->solar) ? floatval($singleSolarData->solar) : 0];
         }
 
         foreach ($allBatteriesData as $singleBatteryData) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleBatteryData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleBatteryData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $voltage[] = [$labels, isset($singleBatteryData->voltage) ? floatval($singleBatteryData->voltage) : 0];
         }
         $data['solar'] = $solar;
@@ -357,12 +357,70 @@ class DashboardController extends Controller
         $solar = [];
         $uv = [];
         foreach ($allData as $singleData) {
-            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone))* 1000;
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : ''];
             $uv[] = [$labels, isset($singleData->uv) ? floatval($singleData->uv) : ''];
         }
         $data['solar'] = $solar;
         $data['uv'] = $uv;
+        return response()->json($data);
+    }
+
+    public function historicalChart(DashboardAction $action, $id, $chart)
+    {
+        $chartContainer = [
+            'rainfall-raw' => ['precipitation_(mm)'],
+            'rainfall-daily' => ['precipitation_(mm)'],
+            'rainfall-monthly' => ['precipitation_(mm)'],
+            'temperature' => ['air_temperature_(°C)'],
+            'msl-pressure' => ['atmospheric_pressure_(hPa)', 'pressure_(hPa)'],
+            'humidity' => ['relative_humidity_(%)', 'humidity_(%)'],
+            'wind-rose' => ['wind_direction_(°)']
+        ];
+
+        abort_if(!array_key_exists($chart, $chartContainer) || !in_array($id, config('basestations.allow')), 404);
+
+        $parameters = $chartContainer[$chart];
+        $sensors = $action->getSensorData($id);
+        $sensorFlag = false;
+        $findSensor = [];
+        $singleParam = '';
+
+        foreach ($parameters as $param) {
+            $findSensor = $action->findSensorKey($sensors, $param);
+            if (isset($findSensor['sensor'])) {
+                $sensorFlag = true;
+                $singleParam = $param;
+                break;
+            }
+        }
+
+        abort_if(!$sensorFlag, 404);
+
+        $sensorKey = $findSensor['key'];
+        $paramId = $findSensor['sensor']->id;
+
+        return view('pages.single-chart', compact('id', 'chart', 'sensorKey', 'singleParam', 'paramId'));
+    }
+
+    public function getSingleChartData(Request $request)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensorId = $request->id;
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw('id, sensors_id, created_at, D' . $request->key . ' AS data')
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $data = [];
+        foreach ($allData as $singleData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
+            $data[] = [$labels, isset($singleData->data) ? floatval($singleData->data) : 0];
+        }
         return response()->json($data);
     }
 }

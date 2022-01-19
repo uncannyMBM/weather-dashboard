@@ -16,3 +16,7 @@ Route::get('get-max-pm-chart-data', [DashboardController::class, 'getMaxPmChartD
 Route::get('solar-voltage-chart-data', [DashboardController::class, 'getSolarVoltageChartData'])->name('get.solar.voltage.chart.data');
 
 Route::get('solar-uv-chart-data', [DashboardController::class, 'getSolarUvChartData'])->name('get.solar.uv.chart.data');
+
+Route::get('historical-chart/{id}/{chart}', [DashboardController::class, 'historicalChart'])->name('historical.chart');
+
+Route::get('get-single-chart-data', [DashboardController::class, 'getSingleChartData'])->name('get.single.chart.data');

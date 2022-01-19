@@ -400,6 +400,95 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-0 mt-lg-5 mb-5">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Historical Charts</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            @if($is_rain_fall)
+                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-raw']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall Raw
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-daily']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
+                                                Daily
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-monthly']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
+                                                Monthly
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                            @if($is_air_temp)
+                                <a href="{{ route('historical.chart', [$base->id, 'temperature']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-temperature-high fa-2x"></i>
+                                                Temperature
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                            @if($is_atmospheric_pressure)
+                                <a href="{{ route('historical.chart', [$base->id, 'msl-pressure']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-tire-pressure-warning fa-2x"></i>
+                                                MSL Pressure</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                            @if($is_relative_humidity)
+                                <a href="{{ route('historical.chart', [$base->id, 'humidity']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-cloud-sun fa-2x"></i> Humidity</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                            @if($is_wind_speed)
+                                <a href="{{ route('historical.chart', [$base->id, 'wind-rose']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Wind Rose</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                            @if($is_gust_speed)
+                                <a href="{{ route('historical.chart', [$base->id, 'guast-wind']) }}" class="btn">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Guast and Wind</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         @if($is_avg_pm1 || $is_avg_pm25 || $is_avg_pm4 || $is_avg_pm10)
             <div class="row mt-0 mt-lg-5 mb-5">
                 <div class="col-md-12">
@@ -570,7 +659,7 @@
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
-                            if (pm1Series){
+                            if (pm1Series) {
                                 pmColors.push('#1abc9c');
                                 pmSeries.push({
                                     data: response.pm1,
@@ -679,7 +768,7 @@
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
-                            if (pm1Series){
+                            if (pm1Series) {
                                 pmColors.push('#1abc9c');
                                 pmSeries.push({
                                     data: response.pm1,
@@ -823,7 +912,7 @@
                                     data: response.solar,
                                     lineWidth: 0.5,
                                     name: 'solar_(W/m²)'
-                                },{
+                                }, {
                                     yAxis: 1,
                                     data: response.voltage,
                                     lineWidth: 0.5,
@@ -893,11 +982,11 @@
                                 xAxis: {
                                     type: 'datetime',
                                 },
-                                yAxis:[{
+                                yAxis: [{
                                     title: {
                                         text: 'Solar'
                                     },
-                                },{
+                                }, {
                                     title: {
                                         text: 'UV'
                                     },
@@ -905,12 +994,12 @@
                                 }],
                                 colors: ['#1abc9c', '#9b59b6'],
                                 series: [{
-                                    yAxis:0,
+                                    yAxis: 0,
                                     data: response.solar,
                                     lineWidth: 0.5,
                                     name: 'solar_(W/m²)'
-                                },{
-                                    yAxis:1,
+                                }, {
+                                    yAxis: 1,
                                     data: response.uv,
                                     lineWidth: 0.5,
                                     name: 'uv_index'
