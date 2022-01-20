@@ -18,5 +18,10 @@ Route::get('solar-voltage-chart-data', [DashboardController::class, 'getSolarVol
 Route::get('solar-uv-chart-data', [DashboardController::class, 'getSolarUvChartData'])->name('get.solar.uv.chart.data');
 
 Route::get('historical-chart/{id}/{chart}', [DashboardController::class, 'historicalChart'])->name('historical.chart');
-
 Route::get('get-single-chart-data', [DashboardController::class, 'getSingleChartData'])->name('get.single.chart.data');
+
+Route::get('historical-guast-wind-chart/{id}', [DashboardController::class, 'historicalGuastWindChart'])->name('historical.guast.wind.chart');
+Route::get('get-guast-wind-data', [DashboardController::class, 'getGuastWindChartData'])->name('get.guast.wind.chart.data');
+
+Route::get('historical-combine-chart/{id}', [DashboardController::class, 'historicalCombineChart'])->name('historical.combine.chart');
+Route::get('get-combine-chart-data', [DashboardController::class, 'getCombineChartData'])->name('get.combine.chart.data');

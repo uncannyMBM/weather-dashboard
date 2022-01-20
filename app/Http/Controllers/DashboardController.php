@@ -65,7 +65,6 @@ class DashboardController extends Controller
                 $data['is_relative_humidity'] = true;
             }
 
-            $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
             $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
             $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
             $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
@@ -344,8 +343,8 @@ class DashboardController extends Controller
         $uvData = $action->findSensorKey($sensors, 'uv_index');
         $sensorId = isset($solarData['sensor']) ? $solarData['sensor']->id : $uvData['sensor']->id;
         $coulms = 'id, sensors_id, created_at';
-        $coulms .= !empty($solarData['key']) ? ', D' . $solarData['key'] . ' AS solar' : 0;
-        $coulms .= !empty($uvData['key']) ? ', D' . $uvData['key'] . ' AS uv' : 0;
+        $coulms .= !empty($solarData['key']) ? ', D' . $solarData['key'] . ' AS solar' : '';
+        $coulms .= !empty($uvData['key']) ? ', D' . $uvData['key'] . ' AS uv' : '';
 
         $allData = DB::table('base_station_sensors_data')
             ->selectRaw($coulms)
@@ -421,6 +420,208 @@ class DashboardController extends Controller
             $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
             $data[] = [$labels, isset($singleData->data) ? floatval($singleData->data) : 0];
         }
+        return response()->json($data);
+    }
+
+    public function historicalGuastWindChart(DashboardAction $action, $id)
+    {
+        abort_if(!in_array($id, config('basestations.allow')), 404);
+
+        $sensors = $action->getSensorData($id);
+        $winData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $gustData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+
+        abort_if(!isset($winData['sensor'], $gustData['sensor']), 404);
+
+        return view('pages.gust-wind', compact('id'));
+    }
+
+    public function getGuastWindChartData(Request $request, DashboardAction $action)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $gustData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+        $winData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $sensorId = isset($gustData['sensor']) ? $gustData['sensor']->id : $winData['sensor']->id;
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($gustData['key']) ? ', D' . $gustData['key'] . ' AS gust' : '';
+        $coulms .= !empty($winData['key']) ? ', D' . $winData['key'] . ' AS wind' : '';
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        $gust = [];
+        $wind = [];
+        foreach ($allData as $singleData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
+            $gust[] = [$labels, isset($singleData->gust) ? floatval($singleData->gust) : ''];
+            $wind[] = [$labels, isset($singleData->wind) ? floatval($singleData->wind) : ''];
+        }
+        $data['gust'] = $gust;
+        $data['wind'] = $wind;
+        return response()->json($data);
+    }
+
+    public function historicalCombineChart(DashboardAction $action, $id)
+    {
+        abort_if(!in_array($id, config('basestations.allow')), 404);
+
+        $sensors = $action->getSensorData($id);
+        $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
+        $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
+        $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
+        $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
+        $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+        $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+        $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+        $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+        $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+
+        $data['is_rain_fall'] = isset($rainFallData['sensor']) ? true : false;
+        $data['is_air_temp'] = isset($airTempData['sensor']) ? true : false;
+        $data['is_wind_speed'] = isset($windSpeedData['sensor']) ? true : false;
+        $data['is_gust_speed'] = isset($gustSpeedData['sensor']) ? true : false;
+
+        if (!isset($atmosphericPressureData['sensor'])) {
+            $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
+            $data['is_atmospheric_pressure'] = isset($atmosphericPressureData['sensor']) ? true : false;
+        } else {
+            $data['is_atmospheric_pressure'] = true;
+        }
+
+        if (!isset($relativeHumidityData['sensor'])) {
+            $relativeHumidityData = $action->findSensorKey($sensors, 'humidity_(%)');
+            $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
+        } else {
+            $data['is_relative_humidity'] = true;
+        }
+
+        $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
+        $data['is_avg_pm1'] = isset($avgPm1Data['sensor']) ? true : false;
+        $data['is_avg_pm25'] = isset($avgPm25Data['sensor']) ? true : false;
+        $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
+        $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
+        $data['id'] = $id;
+        return view('pages.combine', $data);
+    }
+
+    public function getCombineChartData(Request $request, DashboardAction $action)
+    {
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
+        $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
+        $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
+        if (!isset($atmosphericPressureData['sensor'])) {
+            $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
+        }
+        $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
+        if (!isset($relativeHumidityData['sensor'])) {
+            $relativeHumidityData = $action->findSensorKey($sensors, 'humidity_(%)');
+        }
+        $windDirectionData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+        $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+        $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+        $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+        $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+
+        $avgSensorId = isset($avgPm1Data['sensor']) ? $avgPm1Data['sensor']->id : (isset($avgPm25Data['sensor']) ? $avgPm25Data['sensor']->id : (isset($avgPm4Data['sensor']) ? $avgPm4Data['sensor']->id : $avgPm10Data['sensor']->id));
+        $allSensorId = isset($rainFallData['sensor']) ? $rainFallData['sensor']->id : (isset($airTempData['sensor']) ? $airTempData['sensor']->id : (isset($atmosphericPressureData['sensor']) ? $atmosphericPressureData['sensor']->id : (isset($relativeHumidityData['sensor']) ? $relativeHumidityData['sensor']->id : (isset($windDirectionData['sensor']) ? $windDirectionData['sensor']->id : (isset($windSpeedData['sensor']) ? $windSpeedData['sensor']->id : $gustSpeedData['sensor']->id)))));
+
+        $rainfall = [];
+        $airTemp = [];
+        $pressure = [];
+        $humidity = [];
+        $windDirection = [];
+        $windSpeed = [];
+        $gustSpeed = [];
+        $pm1 = [];
+        $pm25 = [];
+        $pm4 = [];
+        $pm10 = [];
+
+        $allcoulms = 'id, sensors_id, created_at';
+        $allcoulms .= !empty($rainFallData['key']) ? ', D' . $rainFallData['key'] . ' AS rainfall' : '';
+        $allcoulms .= !empty($airTempData['key']) ? ', D' . $airTempData['key'] . ' AS airTemp' : '';
+        $allcoulms .= !empty($atmosphericPressureData['key']) ? ', D' . $atmosphericPressureData['key'] . ' AS pressure' : '';
+        $allcoulms .= !empty($relativeHumidityData['key']) ? ', D' . $relativeHumidityData['key'] . ' AS humidity' : '';
+        $allcoulms .= !empty($windDirectionData['key']) ? ', D' . $windDirectionData['key'] . ' AS windDirection' : '';
+        $allcoulms .= !empty($windSpeedData['key']) ? ', D' . $windSpeedData['key'] . ' AS windSpeed' : '';
+        $allcoulms .= !empty($gustSpeedData['key']) ? ', D' . $gustSpeedData['key'] . ' AS gustSpeed' : '';
+
+        if ($avgSensorId == $allSensorId) {
+            $allcoulms .= !empty($avgPm1Data['key']) ? ', D' . $avgPm1Data['key'] . ' AS pm1' : '';
+            $allcoulms .= !empty($avgPm25Data['key']) ? ', D' . $avgPm25Data['key'] . ' AS pm25' : '';
+            $allcoulms .= !empty($avgPm4Data['key']) ? ', D' . $avgPm4Data['key'] . ' AS pm4' : '';
+            $allcoulms .= !empty($avgPm10Data['key']) ? ', D' . $avgPm10Data['key'] . ' AS pm10' : '';
+        } else {
+            $avgcoulms = 'id, sensors_id, created_at';
+            $avgcoulms .= !empty($avgPm1Data['key']) ? ', D' . $avgPm1Data['key'] . ' AS pm1' : '';
+            $avgcoulms .= !empty($avgPm25Data['key']) ? ', D' . $avgPm25Data['key'] . ' AS pm25' : '';
+            $avgcoulms .= !empty($avgPm4Data['key']) ? ', D' . $avgPm4Data['key'] . ' AS pm4' : '';
+            $avgcoulms .= !empty($avgPm10Data['key']) ? ', D' . $avgPm10Data['key'] . ' AS pm10' : '';
+
+            $avgData = DB::table('base_station_sensors_data')
+                ->selectRaw($avgcoulms)
+                ->where('sensors_id', $avgSensorId)
+                ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+                ->oldest()
+                ->get();
+
+            foreach ($avgData as $avg) {
+                $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $avg->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
+                $pm1[] = [$labels, isset($avg->pm1) ? floatval($avg->pm1) : 0];
+                $pm25[] = [$labels, isset($avg->pm25) ? floatval($avg->pm25) : 0];
+                $pm4[] = [$labels, isset($avg->pm4) ? floatval($avg->pm4) : 0];
+                $pm10[] = [$labels, isset($avg->pm10) ? floatval($avg->pm10) : 0];
+            }
+        }
+
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw($allcoulms)
+            ->where('sensors_id', $allSensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+
+        foreach ($allData as $singleData) {
+            $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
+            $rainfall[] = [$labels, isset($singleData->rainfall) ? floatval($singleData->rainfall) : 0];
+            $airTemp[] = [$labels, isset($singleData->airTemp) ? floatval($singleData->airTemp) : 0];
+            $pressure[] = [$labels, isset($singleData->pressure) ? floatval($singleData->pressure) : 0];
+            $humidity[] = [$labels, isset($singleData->humidity) ? floatval($singleData->humidity) : 0];
+            $windDirection[] = [$labels, isset($singleData->windDirection) ? floatval($singleData->windDirection) : 0];
+            $windSpeed[] = [$labels, isset($singleData->windSpeed) ? floatval($singleData->windSpeed) : 0];
+            $gustSpeed[] = [$labels, isset($singleData->gustSpeed) ? floatval($singleData->gustSpeed) : 0];
+            if ($avgSensorId == $allSensorId) {
+                $pm1[] = [$labels, isset($singleData->pm1) ? floatval($singleData->pm1) : 0];
+                $pm25[] = [$labels, isset($singleData->pm25) ? floatval($singleData->pm25) : 0];
+                $pm4[] = [$labels, isset($singleData->pm4) ? floatval($singleData->pm4) : 0];
+                $pm10[] = [$labels, isset($singleData->pm10) ? floatval($singleData->pm10) : 0];
+            }
+        }
+        $data['rainfall'] = $rainfall;
+        $data['airTemp'] = $airTemp;
+        $data['pressure'] = $pressure;
+        $data['humidity'] = $humidity;
+        $data['windDirection'] = $windDirection;
+        $data['windSpeed'] = $windSpeed;
+        $data['gustSpeed'] = $gustSpeed;
+        $data['pm1'] = $pm1;
+        $data['pm25'] = $pm25;
+        $data['pm4'] = $pm4;
+        $data['pm10'] = $pm10;
         return response()->json($data);
     }
 }

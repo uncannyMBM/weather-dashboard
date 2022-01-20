@@ -466,7 +466,7 @@
                                     </div>
                                 </a>
                             @endif
-                            @if($is_wind_speed)
+                            @if($is_wind_direction)
                                 <a href="{{ route('historical.chart', [$base->id, 'wind-rose']) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
@@ -475,8 +475,8 @@
                                     </div>
                                 </a>
                             @endif
-                            @if($is_gust_speed)
-                                <a href="{{ route('historical.chart', [$base->id, 'guast-wind']) }}" class="btn">
+                            @if($is_wind_speed && $is_gust_speed)
+                                <a href="{{ route('historical.guast.wind.chart', $base->id) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Guast and Wind</h6>
@@ -484,6 +484,13 @@
                                     </div>
                                 </a>
                             @endif
+                            <a href="{{ route('historical.combine.chart', $base->id) }}" class="btn">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-chart-bar fa-2x"></i> Combine Chart</h6>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
