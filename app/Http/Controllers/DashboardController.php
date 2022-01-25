@@ -197,16 +197,21 @@ class DashboardController extends Controller
             $data['avgPm1Data'] = $action->getAvgData($avgPm1Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
 
         $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
-        if (isset($avgPm25Data['sensor']))
+
+        if (isset($avgPm25Data['sensor'])) {
             $data['avgPm25Data'] = $action->getAvgData($avgPm25Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['pm25ChartData'] = $action->getPm25ChartData($data['avgPm25Data']->avgData);
+        }
 
         $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
         if (isset($avgPm4Data['sensor']))
             $data['avgPm4Data'] = $action->getAvgData($avgPm4Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
 
         $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
-        if (isset($avgPm10Data['sensor']))
+        if (isset($avgPm10Data['sensor'])) {
             $data['avgPm10Data'] = $action->getAvgData($avgPm10Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
+            $data['pm10ChartData'] = $action->getPm10ChartData($data['avgPm10Data']->avgData);
+        }
 
         return response()->json($data);
     }
@@ -369,8 +374,6 @@ class DashboardController extends Controller
     {
         $chartContainer = [
             'rainfall-raw' => ['precipitation_(mm)'],
-            'rainfall-daily' => ['precipitation_(mm)'],
-            'rainfall-monthly' => ['precipitation_(mm)'],
             'temperature' => ['air_temperature_(°C)'],
             'msl-pressure' => ['atmospheric_pressure_(hPa)', 'pressure_(hPa)'],
             'humidity' => ['relative_humidity_(%)', 'humidity_(%)'],
@@ -464,6 +467,114 @@ class DashboardController extends Controller
         }
         $data['gust'] = $gust;
         $data['wind'] = $wind;
+        return response()->json($data);
+    }
+
+    public function historicalRainfallDailyChart(DashboardAction $action, $id)
+    {
+        abort_if(!in_array($id, config('basestations.allow')), 404);
+
+        $sensors = $action->getSensorData($id);
+
+        $rainFall = $action->findSensorKey($sensors, 'precipitation_(mm)');
+
+        abort_if(!isset($rainFall['sensor']), 404);
+
+        $sensorKey = $rainFall['key'];
+        $paramId = $rainFall['sensor']->id;
+
+        return view('pages.rainfall-daily', compact('id', 'sensorKey', 'paramId'));
+    }
+
+    public function getRainfallChartDailyData(Request $request)
+    {
+        $sensorId = $request->id;
+
+        $convertedStartedDate = Carbon::createFromFormat('F Y', $request->dateData['fromDate'], $request->timeZone)->startOfMonth()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('F Y', $request->dateData['toDate'], $request->timeZone)->endOfMonth()->setTimezone(config('app.timezone'))->toDateTimeString();
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw("id, sensors_id, created_at, D{$request->key} AS data")
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get()
+            ->map(function ($value) use ($request) {
+                $createdAt = Carbon::parse($value->created_at)->setTimezone($request->timeZone);
+                $value->created_at = $createdAt->toDateTimeString();
+                $value->month = $createdAt->format('M');
+                $value->day = $createdAt->format('d');
+                return $value;
+            })
+            ->groupBy(['month', 'day']);
+
+        $categories = [];
+        $rainFall = [];
+        foreach ($allData as $key => $singleData) {
+            foreach ($singleData as $singleKey => $singleRow) {
+                $categories[] = $key . '-' . $singleKey;
+                $rainFall[] = $singleRow->sum('data');
+            }
+        }
+        $data = [
+            'categories' => $categories,
+            'rainFall' => $rainFall
+        ];
+
+        return response()->json($data);
+    }
+
+    public function historicalRainfallMonthlyChart(DashboardAction $action, $id)
+    {
+        abort_if(!in_array($id, config('basestations.allow')), 404);
+
+        $sensors = $action->getSensorData($id);
+
+        $rainFall = $action->findSensorKey($sensors, 'precipitation_(mm)');
+
+        abort_if(!isset($rainFall['sensor']), 404);
+
+        $sensorKey = $rainFall['key'];
+        $paramId = $rainFall['sensor']->id;
+
+        return view('pages.rainfall-monthly', compact('id', 'sensorKey', 'paramId'));
+    }
+
+    public function getRainfallChartMonthlyData(Request $request)
+    {
+        $sensorId = $request->id;
+
+        $convertedStartedDate = Carbon::createFromFormat('Y', $request->dateData['fromDate'], $request->timeZone)->startOfYear()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('Y', $request->dateData['toDate'], $request->timeZone)->endOfYear()->setTimezone(config('app.timezone'))->toDateTimeString();
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw("id, sensors_id, created_at, D{$request->key} AS data")
+            ->where('sensors_id', $sensorId)
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get()
+            ->map(function ($value) use ($request) {
+                $createdAt = Carbon::parse($value->created_at)->setTimezone($request->timeZone);
+                $value->created_at = $createdAt->toDateTimeString();
+                $value->year = $createdAt->format('Y');
+                $value->month = $createdAt->format('M');
+                return $value;
+            })
+            ->groupBy(['year', 'month']);
+
+        $categories = [];
+        $rainFall = [];
+        foreach ($allData as $key => $singleData) {
+            foreach ($singleData as $singleKey => $singleRow) {
+                $categories[] = $singleKey . ' ' . $key;
+                $rainFall[] = $singleRow->sum('data');
+            }
+        }
+        $data = [
+            'categories' => $categories,
+            'rainFall' => $rainFall
+        ];
+
         return response()->json($data);
     }
 
@@ -625,3 +736,4 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 }
+

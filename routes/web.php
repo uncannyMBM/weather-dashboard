@@ -20,6 +20,12 @@ Route::get('solar-uv-chart-data', [DashboardController::class, 'getSolarUvChartD
 Route::get('historical-chart/{id}/{chart}', [DashboardController::class, 'historicalChart'])->name('historical.chart');
 Route::get('get-single-chart-data', [DashboardController::class, 'getSingleChartData'])->name('get.single.chart.data');
 
+Route::get('historical-rainfall-daily-chart/{id}', [DashboardController::class, 'historicalRainfallDailyChart'])->name('historical.rainfall.daily.chart');
+Route::get('get-rainfall-daily-data', [DashboardController::class, 'getRainfallChartDailyData'])->name('get.rainfall.daily.chart.data');
+
+Route::get('historical-rainfall-monthly-chart/{id}', [DashboardController::class, 'historicalRainfallMonthlyChart'])->name('historical.rainfall.monthly.chart');
+Route::get('get-rainfall-monthly-data', [DashboardController::class, 'getRainfallChartMonthlyData'])->name('get.rainfall.monthly.chart.data');
+
 Route::get('historical-guast-wind-chart/{id}', [DashboardController::class, 'historicalGuastWindChart'])->name('historical.guast.wind.chart');
 Route::get('get-guast-wind-data', [DashboardController::class, 'getGuastWindChartData'])->name('get.guast.wind.chart.data');
 

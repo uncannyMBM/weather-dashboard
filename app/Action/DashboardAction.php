@@ -103,4 +103,32 @@ class DashboardAction
         }
         return $data;
     }
+
+    public function getPm25ChartData($avg)
+    {
+        $breaksPoints_pm_2_5 = config('aqibreakpoints.pm25');
+        foreach ($breaksPoints_pm_2_5 as $key => $value) {
+            if (($value["bpLo"] <= $avg) && ($avg <= $value["bpHi"])) {
+                $aqi = ((($value["iHi"] - $value["iLo"]) / ($value["bpHi"] - $value["bpLo"])) * ($avg - $value["bpLo"])) + $value["iLo"];
+                $aqi = round($aqi, 2);
+                if ($key == 6) {
+                    return ["aqi" => $aqi, "info" => $breaksPoints_pm_2_5[$key]['info'], "start_value" => $value["iLo"], "end_value" => $breaksPoints_pm_2_5[$key]["iHi"]];
+                } else {
+                    return ["aqi" => $aqi, "info" => $breaksPoints_pm_2_5[$key]['info'], "start_value" => $value["iLo"], "end_value" => $breaksPoints_pm_2_5[$key + 1]["iHi"]];
+                }
+            }
+        }
+    }
+
+    public function getPm10ChartData($avg)
+    {
+        $breaksPoints_pm_10 = config('aqibreakpoints.pm10');
+        foreach ($breaksPoints_pm_10 as $key => $value) {
+            if (($value["bpLo"] <= $avg) && ($avg <= $value["bpHi"])) {
+                $aqi = ((($value["iHi"] - $value["iLo"]) / ($value["bpHi"] - $value["bpLo"])) * ($avg - $value["bpLo"])) + $value["iLo"];
+                $aqi = round($aqi, 2);
+                return ["aqi" => $aqi, "start_value" => $value["iLo"], "end_value" => $breaksPoints_pm_10[$key + 1]["iHi"]];
+            }
+        }
+    }
 }

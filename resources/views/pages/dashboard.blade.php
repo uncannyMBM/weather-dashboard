@@ -40,10 +40,10 @@
                                     class="text-warning">{{ $baseParams->primary_data_source_types_id == 4 ? 'MQTT Mode' : ' ' }}</span>
                         </li>
                         <li class="list-inline-item text-white">At: <span
-                                    class="text-warning">{{ \Carbon\Carbon::parse($base->latest_data_timestamp)->format('d-m-Y h:i:s A') }}</span>
+                                    class="text-warning" v-cloak>@{{ load_time_zone }}</span>
                         </li>
                         <li class="list-inline-item text-white">Timezone: <span
-                                    class="text-warning">{{ $base->time_zone }}</span>
+                                    class="text-warning" v-cloak>@{{ timeZone }}</span>
                         </li>
                     </ul>
                 </div>
@@ -82,6 +82,20 @@
                     </div>
                 </div>
             @endif
+            @if($is_wind_direction)
+                <div class="col-12 col-lg-2 mb-2 mb-lg-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
+                                        style="font-size: 16px;">°</sup>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
             @if($is_rain_fall)
                 <div class="col-6 col-lg-2">
                     <div class="card">
@@ -99,7 +113,7 @@
                 </div>
             @endif
             @if($is_uv)
-                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
+                <div class="col-6 col-lg-2 mb-1 mb-lg-0">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -114,16 +128,36 @@
                     </div>
                 </div>
             @endif
-            @if($is_wind_direction)
-                <div class="col-12 col-lg-2 mb-2 mb-lg-0">
+        </div>
+        <div class="row mt-0 mt-lg-5">
+            @if($is_avg_pm25)
+                <div class="col-6 col-lg-2">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
-                                        style="font-size: 16px;">°</sup>
-                            </h6>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6>AQI PM2.5: <span v-cloak>@{{ aqi_PM25 }}</span></h6>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
+                            <div id="aqi-pm25-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if($is_avg_pm10)
+                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6>AQI PM10.0: <span v-cloak>@{{ aqi_PM10 }}</span></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="aqi-pm10-chart" style="width: 100%;height: 300px;"></div>
                         </div>
                     </div>
                 </div>
@@ -417,7 +451,7 @@
                                         </div>
                                     </div>
                                 </a>
-                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-daily']) }}" class="btn">
+                                <a href="{{ route('historical.rainfall.daily.chart', $base->id) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
@@ -426,7 +460,7 @@
                                         </div>
                                     </div>
                                 </a>
-                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-monthly']) }}" class="btn">
+                                <a href="{{ route('historical.rainfall.monthly.chart', $base->id) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
@@ -592,6 +626,7 @@
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-circular-gauge.min.js"></script>
     <script src="https://cdn.anychart.com/releases/v8/js/anychart-linear-gauge.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-table.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
@@ -609,6 +644,12 @@
     @endif
     @if($is_uv)
         <script src="{{ asset('js/uv.js') }}"></script>
+    @endif
+    @if($is_avg_pm25)
+        <script src="{{ asset('js/pm25.js') }}"></script>
+    @endif
+    @if($is_avg_pm10)
+        <script src="{{ asset('js/pm10.js') }}"></script>
     @endif
     @if($is_atmospheric_pressure)
         <script src="{{ asset('js/atmospheric-pressure.js') }}"></script>
@@ -1027,6 +1068,7 @@
             el: "#main-charts",
             data: {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                load_time_zone: "",
                 is_air_temp: "{{ $is_air_temp }}",
                 is_wind_speed: "{{ $is_wind_speed }}",
                 is_gust_speed: "{{ $is_gust_speed }}",
@@ -1055,6 +1097,8 @@
                 monthly_rain_fall: 0,
                 yearly_rain_fall: 0,
                 uv: '0',
+                aqi_PM25: 0,
+                aqi_PM10: 0,
                 atmospheric_pressure: '0',
                 msl_pressure_min: 0,
                 msl_pressure_max: 0,
@@ -1073,6 +1117,7 @@
                 avg_pm_10: 0,
             },
             mounted() {
+                this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
                 this.getChartData();
             },
             methods: {
@@ -1155,13 +1200,19 @@
                                 _this.avg_pm_1 = response.data.avgPm1Data ? response.data.avgPm1Data.avgData : 0;
                             }
                             if (_this.is_avg_pm25) {
+                                let aqipm_25 = response.data.pm25ChartData ? response.data.pm25ChartData.aqi : 0;
                                 _this.avg_pm_25 = response.data.avgPm25Data ? response.data.avgPm25Data.avgData : 0;
+                                _this.aqi_PM25 = aqipm_25;
+                                aqiPM25Gauge.data([aqipm_25])
                             }
                             if (_this.is_avg_pm4) {
                                 _this.avg_pm_4 = response.data.avgPm4Data ? response.data.avgPm4Data.avgData : 0;
                             }
                             if (_this.is_avg_pm10) {
+                                let aqipm_10 = response.data.pm10ChartData ? response.data.pm10ChartData.aqi : 0;
                                 _this.avg_pm_10 = response.data.avgPm10Data ? response.data.avgPm10Data.avgData : 0;
+                                _this.aqi_PM10 = aqipm_10;
+                                aqiPM10Gauge.data([aqipm_10])
                             }
                         });
                 },
