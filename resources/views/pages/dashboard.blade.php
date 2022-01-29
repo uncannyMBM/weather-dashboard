@@ -1203,7 +1203,8 @@
                                 let aqipm_25 = response.data.pm25ChartData ? response.data.pm25ChartData.aqi : 0;
                                 _this.avg_pm_25 = response.data.avgPm25Data ? response.data.avgPm25Data.avgData : 0;
                                 _this.aqi_PM25 = aqipm_25;
-                                aqiPM25Gauge.data([aqipm_25])
+                                aqiPM25Gauge.title().text(response.data.pm25ChartData.info);
+                                aqiPM25Gauge.data([aqipm_25]);
                             }
                             if (_this.is_avg_pm4) {
                                 _this.avg_pm_4 = response.data.avgPm4Data ? response.data.avgPm4Data.avgData : 0;
@@ -1212,7 +1213,8 @@
                                 let aqipm_10 = response.data.pm10ChartData ? response.data.pm10ChartData.aqi : 0;
                                 _this.avg_pm_10 = response.data.avgPm10Data ? response.data.avgPm10Data.avgData : 0;
                                 _this.aqi_PM10 = aqipm_10;
-                                aqiPM10Gauge.data([aqipm_10])
+                                aqiPM10Gauge.title().text(response.data.pm10ChartData.info);
+                                aqiPM10Gauge.data([aqipm_10]);
                             }
                         });
                 },

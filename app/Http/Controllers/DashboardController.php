@@ -735,5 +735,122 @@ class DashboardController extends Controller
         $data['pm10'] = $pm10;
         return response()->json($data);
     }
+
+    public function calulateSpeedWithDirection(DashboardAction $action)
+    {
+//        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+//        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $sensors = $action->getSensorData($request->id);
+        $windDirectionData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $winData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $sensorId = isset($windDirectionData['sensor']) ? $windDirectionData['sensor']->id : $winData['sensor']->id;
+        $coulms = 'id, sensors_id, created_at';
+        $coulms .= !empty($windDirectionData['key']) ? ', D' . $windDirectionData['key'] . ' AS direction' : '';
+        $coulms .= !empty($winData['key']) ? ', D' . $winData['key'] . ' AS wind' : '';
+
+        $allData = DB::table('base_station_sensors_data')
+            ->selectRaw($coulms)
+            ->where('sensors_id', $sensorId)
+//            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->oldest()
+            ->get();
+        return $allData;
+        $validDataCount = 0;
+        $dataSource = config('windrose');
+        for ($i = 0; $i < count($data); $i++) {
+            $wind_direction = $data[$i]->wind_direction;
+            $wind_speed = $data[$i]->wind_speed;
+            for ($windDirectionSegmentCount = 0; $windDirectionSegmentCount < 16; $windDirectionSegmentCount++) {
+                if ($windDirectionSegmentCount == 0) {
+                    $wind_direction_lower_band = 348.75;
+                    $wind_direction_upper_band = 11.25;
+                    if ((($wind_direction > $wind_direction_lower_band) && ($wind_direction <= 360)) || (($wind_direction_upper_band < $wind_direction_upper_band) && ($wind_direction_upper_band >= 0))) {
+                        if ($wind_speed <= 0.5) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val1']++;
+                        } else if ($wind_speed > 0.5 && $wind_speed <= 2) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val2']++;
+                        } else if ($wind_speed > 2 && $wind_speed <= 4) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val3']++;
+                        } else if ($wind_speed > 4 && $wind_speed <= 6) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val4']++;
+                        } else if ($wind_speed > 6 && $wind_speed <= 8) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val5']++;
+                        } else if ($wind_speed > 8 && $wind_speed <= 10) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val6']++;
+                        } else if ($wind_speed > 10 && $wind_speed <= 12) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val7']++;
+                        } else if ($wind_speed > 12 && $wind_speed <= 14) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val8']++;
+                        } else if ($wind_speed > 14) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val9']++;
+                        }
+                    }
+                } else {
+                    $wind_direction_lower_band = 11.25 + ($windDirectionSegmentCount - 1) * 22.5;
+                    $wind_direction_upper_band = 11.25 + $windDirectionSegmentCount * 22.5;
+                    if ($wind_direction > $wind_direction_lower_band && $wind_direction <= $wind_direction_upper_band) {
+                        if ($wind_speed <= 0.5) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val1']++;
+                        } else if ($wind_speed > 0.5 && $wind_speed <= 2) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val2']++;
+                        } else if ($wind_speed > 2 && $wind_speed <= 4) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val3']++;
+                        } else if ($wind_speed > 4 && $wind_speed <= 6) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val4']++;
+                        } else if ($wind_speed > 6 && $wind_speed <= 8) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val5']++;
+                        } else if ($wind_speed > 8 && $wind_speed <= 10) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val6']++;
+                        } else if ($wind_speed > 10 && $wind_speed <= 12) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val7']++;
+                        } else if ($wind_speed > 12 && $wind_speed <= 14) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val8']++;
+                        } else if ($wind_speed > 14) {
+                            $validDataCount++;
+                            $dataSource['values'][$windDirectionSegmentCount]['val9']++;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($validDataCount > 0) {
+            $calmTotalPercentage = 0;
+            for ($windDirectionSegmentCount = 0; $windDirectionSegmentCount < 16; $windDirectionSegmentCount++) {
+                $dataSource['values'][$windDirectionSegmentCount]['val1'] = round(($dataSource['values'][$windDirectionSegmentCount]['val1'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val2'] = round(($dataSource['values'][$windDirectionSegmentCount]['val2'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val3'] = round(($dataSource['values'][$windDirectionSegmentCount]['val3'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val4'] = round(($dataSource['values'][$windDirectionSegmentCount]['val4'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val5'] = round(($dataSource['values'][$windDirectionSegmentCount]['val5'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val6'] = round(($dataSource['values'][$windDirectionSegmentCount]['val6'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val7'] = round(($dataSource['values'][$windDirectionSegmentCount]['val7'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val8'] = round(($dataSource['values'][$windDirectionSegmentCount]['val8'] / $validDataCount) * 100, 2);
+                $dataSource['values'][$windDirectionSegmentCount]['val9'] = round(($dataSource['values'][$windDirectionSegmentCount]['val9'] / $validDataCount) * 100, 2);
+                $calmTotalPercentage = $calmTotalPercentage + $dataSource['values'][$windDirectionSegmentCount]['val1'];
+            }
+            $calmPercentagePerDirction = $calmTotalPercentage / 16;
+            for ($windDirectionSegmentCount = 0; $windDirectionSegmentCount < 16; $windDirectionSegmentCount++) {
+                $dataSource['values'][$windDirectionSegmentCount]['val1'] = $calmPercentagePerDirction;
+            }
+        }
+        return $dataSource;
+    }
 }
 

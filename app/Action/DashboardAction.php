@@ -127,7 +127,7 @@ class DashboardAction
             if (($value["bpLo"] <= $avg) && ($avg <= $value["bpHi"])) {
                 $aqi = ((($value["iHi"] - $value["iLo"]) / ($value["bpHi"] - $value["bpLo"])) * ($avg - $value["bpLo"])) + $value["iLo"];
                 $aqi = round($aqi, 2);
-                return ["aqi" => $aqi, "start_value" => $value["iLo"], "end_value" => $breaksPoints_pm_10[$key + 1]["iHi"]];
+                return ["aqi" => $aqi, "info" => $breaksPoints_pm_10[$key]['info'], "start_value" => $value["iLo"], "end_value" => $breaksPoints_pm_10[$key + 1]["iHi"]];
             }
         }
     }
