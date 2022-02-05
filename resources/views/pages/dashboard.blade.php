@@ -162,6 +162,22 @@
                     </div>
                 </div>
             @endif
+            @if($is_fdi)
+                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6>FDI & FDR</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="fdi-chart" style="width: 100%;height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
         <div class="row mt-0 mt-lg-5">
             @if($is_atmospheric_pressure)
@@ -651,6 +667,9 @@
     @if($is_avg_pm10)
         <script src="{{ asset('js/pm10.js') }}"></script>
     @endif
+    @if($is_fdi)
+        <script src="{{ asset('js/fdi.js') }}"></script>
+    @endif
     @if($is_atmospheric_pressure)
         <script src="{{ asset('js/atmospheric-pressure.js') }}"></script>
     @endif
@@ -1084,6 +1103,7 @@
                 is_avg_pm25: "{{ $is_avg_pm25 }}",
                 is_avg_pm4: "{{ $is_avg_pm4 }}",
                 is_avg_pm10: "{{ $is_avg_pm10 }}",
+                is_fdi: "{{ $is_fdi }}",
                 air_temp: '0',
                 air_temp_min: 0,
                 air_temp_max: 0,
@@ -1128,7 +1148,8 @@
                         params: {
                             id: "{{ $base->id }}",
                             currentTime: currentTime,
-                            timeZone: _this.timeZone
+                            timeZone: _this.timeZone,
+                            derived_id: "{{ isset($derived_id) ? $derived_id : null }}"
                         }
                     })
                         .then((response) => {
@@ -1215,6 +1236,11 @@
                                 _this.aqi_PM10 = aqipm_10;
                                 aqiPM10Gauge.title().text(response.data.pm10ChartData.info);
                                 aqiPM10Gauge.data([aqipm_10]);
+                            }
+                            if (_this.is_fdi) {
+                                let fdiVal = response.data.fdiChartData ? response.data.fdiChartData.FDI : 0;
+                                fdiGauge.title().text(response.data.fdiChartData.FDR);
+                                fdiGauge.data([fdiVal]);
                             }
                         });
                 },

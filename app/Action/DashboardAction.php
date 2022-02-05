@@ -131,4 +131,47 @@ class DashboardAction
             }
         }
     }
+
+    public function getSiteDataSourcesBySensorId($id, $siteId)
+    {
+        return DB::table('sites_data_sources')->select('id', 'sites_id', 'data_source_id', 'deleted_at')->whereNull('deleted_at')->where('data_source_id', $id)->where('sites_id', $siteId)->latest()->first();
+    }
+
+    public function paramsDerived($id)
+    {
+        return DB::table('parameters_derived')->select('id', 'name', 'site_data_sources_id', 'deleted_at')->whereNull('deleted_at')->where('site_data_sources_id', $id)->latest()->first();
+    }
+
+    public function getFuncArg($id)
+    {
+        return DB::table('functions_arguments')->select('id', 'functions_instances_id', 'arg2')->where('functions_instances_id', $id)->latest()->first();
+    }
+
+    public function getFDI($windSpeedInKmPerH, $droughtFactor, $humidity, $temperature)
+    {
+        $info = array('FDI' => null, 'FDR' => null, "errorStatus" => false, "errorShortInfo" => null, "errorInfo" => null);
+        try {
+            $FDI = round(2 * exp(-0.45 + (0.987 * log($droughtFactor)) - (0.0345 * $humidity) + (0.0338 * $temperature) + (0.0234 * $windSpeedInKmPerH)), 0);
+            $info['FDI'] = $FDI;
+            if ($FDI >= 0 && $FDI < 12) {
+                $info['FDR'] = "Low-Moderate";
+            } else if ($FDI >= 12 && $FDI < 25) {
+                $info['FDR'] = "High";
+            } else if ($FDI >= 25 && $FDI < 50) {
+                $info['FDR'] = "Very High";
+            } else if ($FDI >= 50 && $FDI < 75) {
+                $info['FDR'] = "Severe";
+            } else if ($FDI >= 75 && $FDI < 99) {
+                $info['FDR'] = "Extreme";
+            } else if ($FDI >= 100) {
+                $info['FDR'] = "Catastrophic";
+            }
+            return $info;
+        } catch (Exception $e) {
+            $info['errorStatus'] = true;
+            $info['errorShortInfo'] = "Error in deriveAwsFDI ";
+            $info['errorInfo'] = $e;
+            return $info;
+        }
+    }
 }

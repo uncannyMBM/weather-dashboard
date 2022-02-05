@@ -15,73 +15,95 @@ class DashboardController extends Controller
         return view('pages.index', compact('bases'));
     }
 
-    public function dashboard(DashboardAction $action, $id, $tag)
+    public function dashboard(Request $request, DashboardAction $action, $id, $tag)
     {
-        try {
-            throw_if(!in_array($id, config('basestations.allow')), 'You are not allow to show the dashboard of this base station');
+        abort_if(!in_array($id, config('basestations.allow')), 404);
 
-            $base = $action->getBaseStationById($id);
-            $baseParams = $action->getBaseStationByBaseStationId($id);
-            $sensors = $action->getSensorData($id);
-            $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
-            $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
-            $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
-            $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
-            $uvData = $action->findSensorKey($sensors, 'uv_index');
-            $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
-            $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
-            $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
-            $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
-            $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
-            $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
-            $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
-            $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
-            $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
-            $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
-            $maxPm1Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm1.0_(µg/m³)');
-            $maxPm25Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm2.5_(µg/m³)');
-            $maxPm4Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm4.0_(µg/m³)');
-            $maxPm10Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm10.0_(µg/m³)');
+        $base = $action->getBaseStationById($id);
+        $baseParams = $action->getBaseStationByBaseStationId($id);
+        $sensors = $action->getSensorData($id);
 
-            $data['base'] = $base;
-            $data['baseParams'] = $baseParams;
-
-            $data['is_air_temp'] = isset($airTempData['sensor']) ? true : false;
-            $data['is_wind_speed'] = isset($windSpeedData['sensor']) ? true : false;
-            $data['is_gust_speed'] = isset($gustSpeedData['sensor']) ? true : false;
-            $data['is_rain_fall'] = isset($rainFallData['sensor']) ? true : false;
-
-            if (!isset($atmosphericPressureData['sensor'])) {
-                $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
-                $data['is_atmospheric_pressure'] = isset($atmosphericPressureData['sensor']) ? true : false;
-            } else {
-                $data['is_atmospheric_pressure'] = true;
+        if (isset($request->site_id)) {
+            $siteIdAxist = false;
+            $dataSourceId = 0;
+            foreach ($sensors as $sensor) {
+                $dataSource = $action->getSiteDataSourcesBySensorId($sensor->id, $request->site_id);
+                if ($dataSource) {
+                    $siteIdAxist = true;
+                    $dataSourceId = $dataSource->id;
+                }
             }
-
-            if (!isset($relativeHumidityData['sensor'])) {
-                $relativeHumidityData = $action->findSensorKey($sensors, 'humidity_(%)');
-                $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
-            } else {
-                $data['is_relative_humidity'] = true;
-            }
-
-            $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
-            $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
-            $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
-            $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
-            $data['is_uv'] = isset($uvData['sensor']) ? true : false;
-            $data['is_avg_pm1'] = isset($avgPm1Data['sensor']) ? true : false;
-            $data['is_avg_pm25'] = isset($avgPm25Data['sensor']) ? true : false;
-            $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
-            $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
-            $data['is_max_pm1'] = isset($maxPm1Data['sensor']) ? true : false;
-            $data['is_max_pm25'] = isset($maxPm25Data['sensor']) ? true : false;
-            $data['is_max_pm4'] = isset($maxPm4Data['sensor']) ? true : false;
-            $data['is_max_pm10'] = isset($maxPm10Data['sensor']) ? true : false;
-            return view('pages.dashboard', $data);
-        } catch (\Exception $exception) {
-            return back()->with('alert', $exception->getMessage());
+            abort_if(!$siteIdAxist, 404);
         }
+
+        $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
+        $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
+        $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
+        $uvData = $action->findSensorKey($sensors, 'uv_index');
+        $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
+        $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
+        $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
+        $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
+        $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
+        $avgPm1Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm1.0_(µg/m³)');
+        $avgPm25Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm2.5_(µg/m³)');
+        $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
+        $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
+        $maxPm1Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm1.0_(µg/m³)');
+        $maxPm25Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm2.5_(µg/m³)');
+        $maxPm4Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm4.0_(µg/m³)');
+        $maxPm10Data = $action->findSensorKey($sensors, 'max_mass_concentration_pm10.0_(µg/m³)');
+
+        $data['base'] = $base;
+        $data['baseParams'] = $baseParams;
+
+        $data['is_air_temp'] = isset($airTempData['sensor']) ? true : false;
+        $data['is_wind_speed'] = isset($windSpeedData['sensor']) ? true : false;
+        $data['is_gust_speed'] = isset($gustSpeedData['sensor']) ? true : false;
+        $data['is_rain_fall'] = isset($rainFallData['sensor']) ? true : false;
+
+        if (!isset($atmosphericPressureData['sensor'])) {
+            $atmosphericPressureData = $action->findSensorKey($sensors, 'pressure_(hPa)');
+            $data['is_atmospheric_pressure'] = isset($atmosphericPressureData['sensor']) ? true : false;
+        } else {
+            $data['is_atmospheric_pressure'] = true;
+        }
+
+        if (!isset($relativeHumidityData['sensor'])) {
+            $relativeHumidityData = $action->findSensorKey($sensors, 'humidity_(%)');
+            $data['is_relative_humidity'] = isset($relativeHumidityData['sensor']) ? true : false;
+        } else {
+            $data['is_relative_humidity'] = true;
+        }
+
+        $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
+        $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
+        $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
+        $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
+        $data['is_uv'] = isset($uvData['sensor']) ? true : false;
+        $data['is_avg_pm1'] = isset($avgPm1Data['sensor']) ? true : false;
+        $data['is_avg_pm25'] = isset($avgPm25Data['sensor']) ? true : false;
+        $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
+        $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
+        $data['is_max_pm1'] = isset($maxPm1Data['sensor']) ? true : false;
+        $data['is_max_pm25'] = isset($maxPm25Data['sensor']) ? true : false;
+        $data['is_max_pm4'] = isset($maxPm4Data['sensor']) ? true : false;
+        $data['is_max_pm10'] = isset($maxPm10Data['sensor']) ? true : false;
+
+        if ($siteIdAxist && $dataSourceId != 0) {
+            $paramsDerived = $action->paramsDerived($dataSourceId);
+            if ($paramsDerived->name == 'fdi') {
+                $data['is_fdi'] = true;
+                $data['derived_id'] = $paramsDerived->id;
+            } else {
+                $data['is_fdi'] = false;
+            }
+        } else {
+            $data['is_fdi'] = false;
+        }
+        return view('pages.dashboard', $data);
     }
 
     public function getChartData(Request $request, DashboardAction $action)
@@ -120,8 +142,8 @@ class DashboardController extends Controller
         if (isset($windSpeedData['sensor'])) {
             $data['windSpeedData'] = $action->getLatestChartData($windSpeedData);
             $data['windSpeedMinMax'] = $action->getMinMaxData($windSpeedData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
+            $data['windSpeedAvgLastHour'] = $action->getAvgData($windSpeedData, [$currentConvertedTime1hourBefore, $currentConvertedTime]);
         }
-
 
         $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
 
@@ -169,7 +191,6 @@ class DashboardController extends Controller
             $data['humidityMinMax'] = $action->getMinMaxData($relativeHumidityData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
-
         $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
 
         if (isset($windSensorsData['sensor']))
@@ -211,6 +232,11 @@ class DashboardController extends Controller
         if (isset($avgPm10Data['sensor'])) {
             $data['avgPm10Data'] = $action->getAvgData($avgPm10Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
             $data['pm10ChartData'] = $action->getPm10ChartData($data['avgPm10Data']->avgData);
+        }
+
+        if (isset($request->derived_id)) {
+            $droughtFactor = $action->getFuncArg($request->derived_id)->arg2 ?? 0;
+            $data['fdiChartData'] = $action->getFDI($data['windSpeedAvgLastHour']->avgData, $droughtFactor, $data['relativeHumidityData']->data, $data['airTempData']->data);
         }
 
         return response()->json($data);
@@ -736,30 +762,29 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function calulateSpeedWithDirection(DashboardAction $action)
+    public function calulateSpeedWithDirection(Request $request, DashboardAction $action)
     {
-//        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
-//        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
         $sensors = $action->getSensorData($request->id);
         $windDirectionData = $action->findSensorKey($sensors, 'wind_direction_(°)');
         $winData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
         $sensorId = isset($windDirectionData['sensor']) ? $windDirectionData['sensor']->id : $winData['sensor']->id;
         $coulms = 'id, sensors_id, created_at';
-        $coulms .= !empty($windDirectionData['key']) ? ', D' . $windDirectionData['key'] . ' AS direction' : '';
-        $coulms .= !empty($winData['key']) ? ', D' . $winData['key'] . ' AS wind' : '';
+        $coulms .= !empty($windDirectionData['key']) ? ', D' . $windDirectionData['key'] . ' AS wind_direction' : '';
+        $coulms .= !empty($winData['key']) ? ', D' . $winData['key'] . ' AS wind_speed' : '';
 
         $allData = DB::table('base_station_sensors_data')
             ->selectRaw($coulms)
             ->where('sensors_id', $sensorId)
-//            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
+            ->whereBetween('created_at', [$convertedStartedDate, $convertedEndedDate])
             ->oldest()
             ->get();
-        return $allData;
         $validDataCount = 0;
         $dataSource = config('windrose');
-        for ($i = 0; $i < count($data); $i++) {
-            $wind_direction = $data[$i]->wind_direction;
-            $wind_speed = $data[$i]->wind_speed;
+        for ($i = 0; $i < count($allData); $i++) {
+            $wind_direction = $allData[$i]->wind_direction;
+            $wind_speed = $allData[$i]->wind_speed;
             for ($windDirectionSegmentCount = 0; $windDirectionSegmentCount < 16; $windDirectionSegmentCount++) {
                 if ($windDirectionSegmentCount == 0) {
                     $wind_direction_lower_band = 348.75;
