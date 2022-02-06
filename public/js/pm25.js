@@ -10,7 +10,7 @@ anychart.onDocumentReady(function () {
     aqiPM25Gauge = anychart.gauges.linear();
     aqiPM25Gauge.title().enabled(true).text('').margin([-15, 0 ,0 ,0]).fontColor('#212121').fontSize(18);
     aqiPM25Gauge.scaleBar(0)
-        .width('8%')
+        .width('5%')
         .from(ticks[0])
         .to(ticks[1])
         .fill({
@@ -19,7 +19,7 @@ anychart.onDocumentReady(function () {
         });
 
     aqiPM25Gauge.scaleBar(1)
-        .width('8%')
+        .width('5%')
         .from(ticks[1])
         .to(ticks[2])
         .fill(warning_color);
@@ -50,6 +50,6 @@ anychart.onDocumentReady(function () {
         .fontSize(18)
         .fontColor('#212121');
 
-    aqiPM25Gauge.bounds(0, '5%', '50%', '90%');
+    aqiPM25Gauge.bounds(0, '5%', '100%', '90%');
     aqiPM25Gauge.container(stage).draw();
 });

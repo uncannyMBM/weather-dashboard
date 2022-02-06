@@ -9,12 +9,13 @@ anychart.onDocumentReady(function () {
 
    let ticks = [0, 10, 25, 50, 75, 100, 120];
 
-    var stage = anychart.graphics.create('fdi-chart');
+    // var stage = anychart.graphics.create('fdi-chart');
 
     fdiGauge = anychart.gauges.linear();
-    fdiGauge.title().enabled(true).text('').margin([-15, 0 ,0 ,0]).fontColor('#212121').fontSize(18);
+
+    fdiGauge.title().enabled(true).text('').margin([-20, 0 ,0 ,0]).fontColor('#212121').fontSize(18);
     fdiGauge.scaleBar(0)
-        .width('8%')
+        .width('5%')
         .from(ticks[0])
         .to(ticks[1])
         .fill({
@@ -23,31 +24,31 @@ anychart.onDocumentReady(function () {
         });
 
     fdiGauge.scaleBar(1)
-        .width('8%')
+        .width('5%')
         .from(ticks[1])
         .to(ticks[2])
         .fill(yello_color);
 
     fdiGauge.scaleBar(2)
-        .width('8%')
+        .width('5%')
         .from(ticks[2])
         .to(ticks[3])
         .fill(orange_color);
 
     fdiGauge.scaleBar(3)
-        .width('8%')
+        .width('5%')
         .from(ticks[3])
         .to(ticks[4])
         .fill(deep_orange_color);
 
     fdiGauge.scaleBar(4)
-        .width('8%')
+        .width('5%')
         .from(ticks[4])
         .to(ticks[5])
         .fill(light_red_color);
 
     fdiGauge.scaleBar(5)
-        .width('8%')
+        .width('5%')
         .from(ticks[5])
         .to(ticks[6])
         .fill(red_color);
@@ -78,6 +79,7 @@ anychart.onDocumentReady(function () {
         .fontSize(18)
         .fontColor('#212121');
 
-    fdiGauge.bounds(0, '5%', '50%', '90%');
-    fdiGauge.container(stage).draw();
+    fdiGauge.bounds(0, '2%', '100%', '95%');
+    fdiGauge.container('fdi-chart');
+    fdiGauge.draw();
 });

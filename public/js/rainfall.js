@@ -7,7 +7,7 @@ anychart.onDocumentReady(function () {
 
     var marker = gaugeRainfall.marker(0);
 
-    marker.offset('35%');
+    marker.offset('12%');
 
     marker.type('triangle-left');
 
@@ -22,12 +22,9 @@ anychart.onDocumentReady(function () {
     axis.minorTicks(true)
     axis.minorTicks().stroke('#cecece');
     axis.width('1%');
-    axis.offset('29.5%');
+    axis.offset('8%');
     axis.orientation('left');
 
-    gaugeRainfall.padding([20, 50]);
-
     gaugeRainfall.container('rainfall-chart');
-
     gaugeRainfall.draw();
 });
