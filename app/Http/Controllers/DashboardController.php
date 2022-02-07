@@ -92,7 +92,7 @@ class DashboardController extends Controller
         $data['is_max_pm4'] = isset($maxPm4Data['sensor']) ? true : false;
         $data['is_max_pm10'] = isset($maxPm10Data['sensor']) ? true : false;
 
-        if ($siteIdAxist && $dataSourceId != 0) {
+        if (isset($siteIdAxist) && $siteIdAxist && $dataSourceId != 0) {
             $paramsDerived = $action->paramsDerived($dataSourceId);
             if ($paramsDerived->name == 'fdi') {
                 $data['is_fdi'] = true;
@@ -762,10 +762,23 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
+    public function historicalWindRoseChart(DashboardAction $action, $id)
+    {
+        abort_if(!in_array($id, config('basestations.allow')), 404);
+
+        $sensors = $action->getSensorData($id);
+        $winDirectionData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+
+        abort_if(!isset($winDirectionData['sensor'], $windSpeedData['sensor']), 404);
+
+        return view('pages.wind-rose', compact('id'));
+    }
+
     public function calulateSpeedWithDirection(Request $request, DashboardAction $action)
     {
-        $convertedStartedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[0], $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
-        $convertedEndedDate = Carbon::createFromFormat('d/m/Y', $request->dateData[1], $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedStartedDate = Carbon::createFromFormat('Y-m-d', $request->dateData, $request->timeZone)->startOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
+        $convertedEndedDate = Carbon::createFromFormat('Y-m-d', $request->dateData, $request->timeZone)->endOfDay()->setTimezone(config('app.timezone'))->toDateTimeString();
         $sensors = $action->getSensorData($request->id);
         $windDirectionData = $action->findSensorKey($sensors, 'wind_direction_(°)');
         $winData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');

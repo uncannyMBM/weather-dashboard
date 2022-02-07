@@ -517,7 +517,7 @@
                                 </a>
                             @endif
                             @if($is_wind_direction)
-                                <a href="{{ route('historical.chart', [$base->id, 'wind-rose']) }}" class="btn">
+                                <a href="{{ route('historical.wind.rose.chart', $base->id) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Wind Rose</h6>

@@ -26,6 +26,7 @@ Route::get('get-rainfall-daily-data', [DashboardController::class, 'getRainfallC
 Route::get('historical-rainfall-monthly-chart/{id}', [DashboardController::class, 'historicalRainfallMonthlyChart'])->name('historical.rainfall.monthly.chart');
 Route::get('get-rainfall-monthly-data', [DashboardController::class, 'getRainfallChartMonthlyData'])->name('get.rainfall.monthly.chart.data');
 
+Route::get('historical-widn-rose-chart/{id}', [DashboardController::class, 'historicalWindRoseChart'])->name('historical.wind.rose.chart');
 Route::get('get-wind-rose-data', [DashboardController::class, 'calulateSpeedWithDirection'])->name('get.wind.rose.chart.data');
 
 Route::get('historical-guast-wind-chart/{id}', [DashboardController::class, 'historicalGuastWindChart'])->name('historical.guast.wind.chart');
