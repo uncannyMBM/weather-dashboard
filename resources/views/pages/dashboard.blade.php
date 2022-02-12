@@ -51,7 +51,7 @@
         </div>
         <div class="row">
             @if($is_air_temp)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i = 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup
@@ -64,7 +64,7 @@
                 </div>
             @endif
             @if($is_wind_speed || $is_gust_speed)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -83,7 +83,7 @@
                 </div>
             @endif
             @if($is_wind_direction)
-                <div class="col-12 col-lg-2 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-2 mb-2 mb-lg-0 {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
@@ -97,7 +97,7 @@
                 </div>
             @endif
             @if($is_rain_fall)
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-2 {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -113,7 +113,7 @@
                 </div>
             @endif
             @if($is_uv)
-                <div class="col-6 col-lg-2 mb-1 mb-lg-0">
+                <div class="col-6 col-lg-2 mb-1 mb-lg-0 {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -128,10 +128,8 @@
                     </div>
                 </div>
             @endif
-        </div>
-        <div class="row mt-0 mt-lg-5">
             @if($is_avg_pm25)
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-2 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -147,7 +145,7 @@
                 </div>
             @endif
             @if($is_avg_pm10)
-                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
+                <div class="col-6 col-lg-2 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -163,7 +161,7 @@
                 </div>
             @endif
             @if($is_fdi)
-                <div class="col-6 col-lg-2 mb-2 mb-lg-0">
+                <div class="col-6 col-lg-2 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -178,10 +176,8 @@
                     </div>
                 </div>
             @endif
-        </div>
-        <div class="row mt-0 mt-lg-5">
             @if($is_atmospheric_pressure)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Atmospheric Pressure: <span v-cloak>@{{ atmospheric_pressure }}</span> <sub>(hPa)</sub>
@@ -194,7 +190,7 @@
                 </div>
             @endif
             @if($is_relative_humidity)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-2 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Relative Humidity: <span v-cloak>@{{ relative_humidity }}%</span></h6>
@@ -206,7 +202,7 @@
                 </div>
             @endif
             @if($is_solar)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Solar: <span v-cloak>@{{ solar }}</span> <sub>(hPa)</sub>
@@ -219,14 +215,14 @@
                 </div>
             @endif
             @if($is_strikes || $is_strike_distance)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0">
+                <div class="col-12 col-lg-2 mb-2 mb-lg-0 {{ $i >= 12 ? 'mt-0 mt-lg-5' : '' }} {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
-                            <div class="row">
-                                <div class="col-md-6">
+                            <div class="d-flex flex-column flex-md-row justify-content-between">
+                                <div>
                                     <h6>Strikes: <span v-cloak>@{{ strikes }}</span></h6>
                                 </div>
-                                <div class="col-md-6 pull-right">
+                                <div>
                                     <h6>Strike Distance: <span v-cloak>@{{ strike_distance }}</span>
                                         <sub>(Km)</sub>
                                     </h6>
