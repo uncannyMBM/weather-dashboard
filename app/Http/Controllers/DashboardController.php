@@ -94,7 +94,7 @@ class DashboardController extends Controller
 
         if (isset($siteIdAxist) && $siteIdAxist && $dataSourceId != 0) {
             $paramsDerived = $action->paramsDerived($dataSourceId);
-            if ($paramsDerived->name == 'fdi') {
+            if (isset($paramsDerived->name) && $paramsDerived->name == 'fdi') {
                 $data['is_fdi'] = true;
                 $data['derived_id'] = $paramsDerived->id;
             } else {
@@ -108,7 +108,7 @@ class DashboardController extends Controller
 
     public function getChartData(Request $request, DashboardAction $action)
     {
-        $localTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime)->setTimezone($request->timeZone);
+        $localTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone);
         $today = Carbon::parse($request->currentTime)->format('Y-m-d');
         $beginingMonth9AmConvertedData = Carbon::createFromFormat('Y-m-d H:i:s', $localTime->firstOfMonth()->addHours(9)->format('Y-m-d H:i:s'), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
         $beginingYear9AmConvertedData = Carbon::createFromFormat('Y-m-d H:i:s', $localTime->firstOfYear()->addHours(9)->format('Y-m-d H:i:s'), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
@@ -118,7 +118,7 @@ class DashboardController extends Controller
         $currentConvertedTimeStarDay = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::parse($request->currentTime)->startOfDay(), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime24hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHours(23)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime1hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHour()->setTimezone(config('app.timezone'))->toDateTimeString();
-        $timeBetween = $localTime->gt($timeOf8Am) == false ? [
+        $timeBetween = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->gt($timeOf8Am) == false ? [
             Carbon::createFromFormat('Y-m-d H:i:s', $today9Am->subDay(1), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString(),
             $currentConvertedTime
         ] :
