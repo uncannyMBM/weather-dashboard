@@ -134,7 +134,7 @@ class DashboardAction
 
     public function getSiteDataSourcesBySensorId($id, $siteId)
     {
-        return DB::table('sites_data_sources')->select('id', 'sites_id', 'data_source_id', 'deleted_at')->whereNull('deleted_at')->where('data_source_id', $id)->where('sites_id', $siteId)->latest()->first();
+        return DB::table('sites_data_sources')->select('id', 'sites_id', 'data_source_id', 'deleted_at')->whereNull('deleted_at')->where('data_source_id', $id)->where('sites_id', $siteId)->first();
     }
 
     public function paramsDerived($id)

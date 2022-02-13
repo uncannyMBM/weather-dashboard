@@ -14,6 +14,7 @@
     </style>
 @endpush
 @section('content')
+    @php($i = 0)
     @include('partials.alert')
     <div id="main-charts">
         <div class="row mt-1">
@@ -51,7 +52,7 @@
         </div>
         <div class="row">
             @if($is_air_temp)
-                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i = 3 }}">
+                <div class="col-12 col-lg-3 mb-2 mb-lg-0 {{ $i += 3 }}">
                     <div class="card">
                         <div class="card-header">
                             <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup

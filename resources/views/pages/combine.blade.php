@@ -85,6 +85,7 @@
                     data: {dateData: dateData, timeZone: timeZone, id: "{{ $id }}"},
                     success: function (response) {
                         let chartSeries = [];
+                        let xSeries = [];
                         let chartColors = [];
                         if (rainfallSeries) {
                             chartColors.push('#27ae60');
@@ -93,6 +94,11 @@
                                 data: response.rainfall,
                                 lineWidth: 0.5,
                                 name: 'Rainfall'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Rainfall'
+                                },
                             });
                         }
                         if (airTempSeries) {
@@ -103,6 +109,12 @@
                                 lineWidth: 0.5,
                                 name: 'Air Temperature'
                             });
+                            xSeries.push({
+                                title: {
+                                    text: 'Air Temperature'
+                                },
+                                opposite: true
+                            });
                         }
                         if (pressureSeries) {
                             chartColors.push('#f1c40f');
@@ -111,6 +123,11 @@
                                 data: response.pressure,
                                 lineWidth: 0.5,
                                 name: 'Atmospheric Pressure'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Atmospheric Pressure'
+                                },
                             });
                         }
                         if (humiditySeries) {
@@ -121,6 +138,12 @@
                                 lineWidth: 0.5,
                                 name: 'Relative Humidity'
                             });
+                            xSeries.push({
+                                title: {
+                                    text: 'Relative Humidity'
+                                },
+                                opposite: true
+                            });
                         }
                         if (windDirectionSeries) {
                             chartColors.push('#7f8c8d');
@@ -129,6 +152,11 @@
                                 data: response.windDirection,
                                 lineWidth: 0.5,
                                 name: 'Wind Direction'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Wind Direction'
+                                },
                             });
                         }
                         if (windSpeedSeries) {
@@ -139,6 +167,12 @@
                                 lineWidth: 0.5,
                                 name: 'Wind Speed'
                             });
+                            xSeries.push({
+                                title: {
+                                    text: 'Wind Speed'
+                                },
+                                opposite: true
+                            });
                         }
                         if (gustSpeedSeries) {
                             chartColors.push('#e17055');
@@ -147,6 +181,11 @@
                                 data: response.gustSpeed,
                                 lineWidth: 0.5,
                                 name: 'Gust Speed'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Gust Speed'
+                                },
                             });
                         }
                         if (pm1Series) {
@@ -157,6 +196,12 @@
                                 lineWidth: 0.5,
                                 name: 'PM 1.0'
                             });
+                            xSeries.push({
+                                title: {
+                                    text: 'Avg Mass Concentration'
+                                },
+                                opposite: true
+                            });
                         }
                         if (pm25Series) {
                             chartColors.push('#9b59b6');
@@ -165,6 +210,12 @@
                                 data: response.pm25,
                                 lineWidth: 0.5,
                                 name: 'PM 2.5'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Avg Mass Concentration'
+                                },
+                                opposite: true
                             });
                         }
                         if (pm4Series) {
@@ -175,14 +226,26 @@
                                 lineWidth: 0.5,
                                 name: 'PM 4.0'
                             });
+                            xSeries.push({
+                                title: {
+                                    text: 'Avg Mass Concentration'
+                                },
+                                opposite: true
+                            });
                         }
-                        if (chartColors) {
+                        if (pm10Series) {
                             chartColors.push('#e74c3c');
                             chartSeries.push({
                                 yAxis: 7,
                                 data: response.pm10,
                                 lineWidth: 0.5,
                                 name: 'PM 10.0'
+                            });
+                            xSeries.push({
+                                title: {
+                                    text: 'Avg Mass Concentration'
+                                },
+                                opposite: true
                             });
                         }
                         Highcharts.chart('single_chart', {
@@ -204,49 +267,15 @@
                                     return tt;
                                 }
                             },
-
                             xAxis: {
                                 type: 'datetime',
                             },
-                            yAxis: [{
-                                title: {
-                                    text: 'Rainfall'
-                                },
-                            }, {
-                                title: {
-                                    text: 'Air Temperature'
-                                },
-                                opposite: true
-                            }, {
-                                title: {
-                                    text: 'Atmospheric Pressure'
-                                },
-                            }, {
-                                title: {
-                                    text: 'Relative Humidity'
-                                },
-                                opposite: true
-                            }, {
-                                title: {
-                                    text: 'Wind Direction'
-                                },
-                            }, {
-                                title: {
-                                    text: 'Wind Speed'
-                                },
-                                opposite: true
-                            }, {
-                                title: {
-                                    text: 'Gust Speed'
-                                },
-                            }, {
-                                title: {
-                                    text: 'Avg Mass Concentration'
-                                },
-                                opposite: true
-                            }],
+                            yAxis: xSeries,
                             colors: chartColors,
-                            series: chartSeries
+                            series: chartSeries,
+                            exporting: {
+                                width: 2000
+                            }
                         });
 
                         Notiflix.Block.remove('.single_chart_loader');

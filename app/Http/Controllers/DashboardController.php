@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Action\DashboardAction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -22,7 +23,6 @@ class DashboardController extends Controller
         $base = $action->getBaseStationById($id);
         $baseParams = $action->getBaseStationByBaseStationId($id);
         $sensors = $action->getSensorData($id);
-
         if (isset($request->site_id)) {
             $siteIdAxist = false;
             $dataSourceId = 0;
@@ -31,6 +31,7 @@ class DashboardController extends Controller
                 if ($dataSource) {
                     $siteIdAxist = true;
                     $dataSourceId = $dataSource->id;
+                    break;
                 }
             }
             abort_if(!$siteIdAxist, 404);
@@ -118,7 +119,7 @@ class DashboardController extends Controller
         $currentConvertedTimeStarDay = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::parse($request->currentTime)->startOfDay(), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime24hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHours(23)->setTimezone(config('app.timezone'))->toDateTimeString();
         $currentConvertedTime1hourBefore = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->subHour()->setTimezone(config('app.timezone'))->toDateTimeString();
-        $timeBetween = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime, $request->timeZone)->gt($timeOf8Am) == false ? [
+        $timeBetween = Carbon::createFromFormat('Y-m-d H:i:s', $request->currentTime)->setTimezone($request->timeZone)->gt($timeOf8Am) == false ? [
             Carbon::createFromFormat('Y-m-d H:i:s', $today9Am->subDay(1), $request->timeZone)->setTimezone(config('app.timezone'))->toDateTimeString(),
             $currentConvertedTime
         ] :
@@ -672,7 +673,7 @@ class DashboardController extends Controller
         $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
         $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
 
-        $avgSensorId = isset($avgPm1Data['sensor']) ? $avgPm1Data['sensor']->id : (isset($avgPm25Data['sensor']) ? $avgPm25Data['sensor']->id : (isset($avgPm4Data['sensor']) ? $avgPm4Data['sensor']->id : $avgPm10Data['sensor']->id));
+        $avgSensorId = isset($avgPm1Data['sensor']) ? $avgPm1Data['sensor']->id : (isset($avgPm25Data['sensor']) ? $avgPm25Data['sensor']->id : (isset($avgPm4Data['sensor']) ? $avgPm4Data['sensor']->id : (isset($avgPm10Data['sensor']) ? $avgPm10Data['sensor']->id : 0)));
         $allSensorId = isset($rainFallData['sensor']) ? $rainFallData['sensor']->id : (isset($airTempData['sensor']) ? $airTempData['sensor']->id : (isset($atmosphericPressureData['sensor']) ? $atmosphericPressureData['sensor']->id : (isset($relativeHumidityData['sensor']) ? $relativeHumidityData['sensor']->id : (isset($windDirectionData['sensor']) ? $windDirectionData['sensor']->id : (isset($windSpeedData['sensor']) ? $windSpeedData['sensor']->id : $gustSpeedData['sensor']->id)))));
 
         $rainfall = [];
