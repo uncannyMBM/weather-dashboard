@@ -793,6 +793,10 @@
                 }
 
                 getAvgChartData();
+
+                setInterval(function () {
+                    getAvgChartData();
+                }, 10000);
             });
         </script>
     @endif
@@ -883,7 +887,6 @@
                                         return tt;
                                     }
                                 },
-
                                 xAxis: {
                                     type: 'datetime',
                                 },
@@ -902,6 +905,10 @@
                 }
 
                 getMaxChartData();
+
+                setInterval(function () {
+                    getMaxChartData();
+                }, 10000);
             });
         </script>
     @endif
@@ -990,6 +997,10 @@
                 }
 
                 getSolarBatteryChartData();
+
+                setInterval(function () {
+                    getSolarBatteryChartData();
+                }, 10000);
             });
         </script>
     @endif
@@ -1076,6 +1087,10 @@
                 }
 
                 getSolarUVChartData();
+
+                setInterval(function () {
+                    getSolarUVChartData();
+                }, 10000);
             });
         </script>
     @endif
@@ -1136,6 +1151,11 @@
             mounted() {
                 this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
                 this.getChartData();
+
+                setInterval(function () {
+                    this.getChartData();
+                    this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
+                }, 10000);
             },
             methods: {
                 getChartData() {
