@@ -886,7 +886,7 @@ class DashboardController extends Controller
             }
             $calmPercentagePerDirction = $calmTotalPercentage / 16;
             for ($windDirectionSegmentCount = 0; $windDirectionSegmentCount < 16; $windDirectionSegmentCount++) {
-                $dataSource['values'][$windDirectionSegmentCount]['val1'] = $calmPercentagePerDirction;
+                $dataSource['values'][$windDirectionSegmentCount]['val1'] = round($calmPercentagePerDirction, 2);
             }
         }
         return $dataSource;
