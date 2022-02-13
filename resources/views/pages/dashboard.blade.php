@@ -644,6 +644,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     @if($is_air_temp)
@@ -784,7 +786,23 @@
                                     },
                                 },
                                 colors: pmColors,
-                                series: pmSeries
+                                series: pmSeries,
+                                exporting: {
+                                    buttons: {
+                                        contextButton: {
+                                            menuItems: ["printChart",
+                                                "separator",
+                                                "downloadPNG",
+                                                "downloadJPEG",
+                                                "downloadPDF",
+                                                "downloadSVG",
+                                                "separator",
+                                                "downloadCSV",
+                                                "downloadXLS",
+                                                "openInCloud"]
+                                        }
+                                    }
+                                }
                             });
 
                             Notiflix.Block.remove('.avg_mass_chart_loader');
@@ -796,7 +814,7 @@
 
                 setInterval(function () {
                     getAvgChartData();
-                }, 10000);
+                }, 600000);
             });
         </script>
     @endif
@@ -896,7 +914,23 @@
                                     },
                                 },
                                 colors: pmColors,
-                                series: pmSeries
+                                series: pmSeries,
+                                exporting: {
+                                    buttons: {
+                                        contextButton: {
+                                            menuItems: ["printChart",
+                                                "separator",
+                                                "downloadPNG",
+                                                "downloadJPEG",
+                                                "downloadPDF",
+                                                "downloadSVG",
+                                                "separator",
+                                                "downloadCSV",
+                                                "downloadXLS",
+                                                "openInCloud"]
+                                        }
+                                    }
+                                }
                             });
 
                             Notiflix.Block.remove('.max_mass_chart_loader');
@@ -908,7 +942,7 @@
 
                 setInterval(function () {
                     getMaxChartData();
-                }, 10000);
+                }, 600000);
             });
         </script>
     @endif
@@ -988,7 +1022,23 @@
                                     data: response.voltage,
                                     lineWidth: 0.5,
                                     name: 'battery_voltage'
-                                }]
+                                }],
+                                exporting: {
+                                    buttons: {
+                                        contextButton: {
+                                            menuItems: ["printChart",
+                                                "separator",
+                                                "downloadPNG",
+                                                "downloadJPEG",
+                                                "downloadPDF",
+                                                "downloadSVG",
+                                                "separator",
+                                                "downloadCSV",
+                                                "downloadXLS",
+                                                "openInCloud"]
+                                        }
+                                    }
+                                }
                             });
 
                             Notiflix.Block.remove('.solar_voltage_chart_loader');
@@ -1000,7 +1050,7 @@
 
                 setInterval(function () {
                     getSolarBatteryChartData();
-                }, 10000);
+                }, 600000);
             });
         </script>
     @endif
@@ -1078,7 +1128,23 @@
                                     data: response.uv,
                                     lineWidth: 0.5,
                                     name: 'uv_index'
-                                }]
+                                }],
+                                exporting: {
+                                    buttons: {
+                                        contextButton: {
+                                            menuItems: ["printChart",
+                                                "separator",
+                                                "downloadPNG",
+                                                "downloadJPEG",
+                                                "downloadPDF",
+                                                "downloadSVG",
+                                                "separator",
+                                                "downloadCSV",
+                                                "downloadXLS",
+                                                "openInCloud"]
+                                        }
+                                    }
+                                }
                             });
 
                             Notiflix.Block.remove('.solar_uv_chart_loader');
@@ -1090,7 +1156,7 @@
 
                 setInterval(function () {
                     getSolarUVChartData();
-                }, 10000);
+                }, 600000);
             });
         </script>
     @endif
@@ -1149,13 +1215,14 @@
                 avg_pm_10: 0,
             },
             mounted() {
-                this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
-                this.getChartData();
+                let _this = this;
+                _this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
+                _this.getChartData();
 
                 setInterval(function () {
-                    this.getChartData();
-                    this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
-                }, 10000);
+                    _this.getChartData();
+                    _this.load_time_zone = moment().format('YYYY-MM-DD h:mm:ss a');
+                }, 600000);
             },
             methods: {
                 getChartData() {

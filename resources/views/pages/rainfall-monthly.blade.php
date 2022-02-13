@@ -65,6 +65,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 @endpush
@@ -136,7 +138,23 @@
                             series: [{
                                 data: response.rainFall,
                                 name: 'Rainfall Monthly'
-                            }]
+                            }],
+                            exporting: {
+                                buttons: {
+                                    contextButton: {
+                                        menuItems: ["printChart",
+                                            "separator",
+                                            "downloadPNG",
+                                            "downloadJPEG",
+                                            "downloadPDF",
+                                            "downloadSVG",
+                                            "separator",
+                                            "downloadCSV",
+                                            "downloadXLS",
+                                            "openInCloud"]
+                                    }
+                                }
+                            }
                         });
 
                         Notiflix.Block.remove('.single_chart_loader');

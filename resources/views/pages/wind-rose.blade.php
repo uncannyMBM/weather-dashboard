@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @push('extra_styles')
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.common.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.light.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.common.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.5/css/dx.light.css"/>
 @endpush
 @section('content')
     @include('partials.alert')
@@ -71,52 +71,59 @@
                         id: "{{ $id }}"
                     },
                     success: function (response) {
-                        const radarOptions = {
-                            palette: 'soft',
+                        historical_zoomed_chart_instance = {
+                            palette: "Bright",
                             dataSource: response.values,
-                            title: 'Wind Rose',
+                            title: "Wind Rose",
                             commonSeriesSettings: {
-                                type: 'stackedbar',
+                                type: "stackedbar"
                             },
                             margin: {
                                 bottom: 50,
-                                left: 100,
+                                left: 100
                             },
-                            onLegendClick(e) {
-                                const series = e.target;
+                            onLegendClick: function (e) {
+                                var series = e.target;
                                 if (series.isVisible()) {
                                     series.hide();
                                 } else {
                                     series.show();
                                 }
                             },
+                            tooltip: {
+                                enabled: true
+                            },
                             argumentAxis: {
-                                discreteAxisDivisionMode: 'crossLabels',
-                                firstPointOnStartAngle: true,
+                                discreteAxisDivisionMode: "crossLabels",
+                                firstPointOnStartAngle: true
                             },
+
                             valueAxis: {
-                                valueMarginsEnabled: false,
+                                valueMarginsEnabled: false
                             },
+
                             export: {
-                                enabled: true,
+                                enabled: true
                             },
                             series: [
-                                { valueField: "val1", name: "Calm" },
-                                { valueField: "val2", name: "0.5-2 m/s" },
-                                { valueField: "val3", name: "2-4 m/s" },
-                                { valueField: "val4", name: "4-6 m/s" },
-                                { valueField: "val5", name: "6-8 m/s" },
-                                { valueField: "val6", name: "8-10 m/s" },
-                                { valueField: "val7", name: "10-12 m/s" },
-                                { valueField: "val8", name: "12-14 m/s" },
-                                { valueField: "val9", name: " 14 > m/s" }
-                            ],
+                                {valueField: "val1", name: "Calm"},
+                                {valueField: "val2", name: "0.5-2 m/s"},
+                                {valueField: "val3", name: "2-4 m/s"},
+                                {valueField: "val4", name: "4-6 m/s"},
+                                {valueField: "val5", name: "6-8 m/s"},
+                                {valueField: "val6", name: "8-10 m/s"},
+                                {valueField: "val7", name: "10-12 m/s"},
+                                {valueField: "val8", name: "12-14 m/s"},
+                                {valueField: "val9", name: " 14 > m/s"}
+                            ]
                         };
-                        const radar = $('#single_chart').dxPolarChart(radarOptions).dxPolarChart('instance');
+
+                        var radar = $("#single_chart").dxPolarChart(historical_zoomed_chart_instance).dxPolarChart("instance");
                         Notiflix.Block.remove('.single_chart_loader');
                     }
                 });
             }
+
             getSingleChartData();
         });
     </script>

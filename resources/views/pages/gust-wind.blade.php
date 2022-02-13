@@ -37,6 +37,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 @endpush
@@ -115,7 +117,23 @@
                                 data: response.wind,
                                 lineWidth: 0.5,
                                 name: 'wind_speed_(m/s)'
-                            }]
+                            }],
+                            exporting: {
+                                buttons: {
+                                    contextButton: {
+                                        menuItems: ["printChart",
+                                            "separator",
+                                            "downloadPNG",
+                                            "downloadJPEG",
+                                            "downloadPDF",
+                                            "downloadSVG",
+                                            "separator",
+                                            "downloadCSV",
+                                            "downloadXLS",
+                                            "openInCloud"]
+                                    }
+                                }
+                            }
                         });
 
                         Notiflix.Block.remove('.single_chart_loader');
