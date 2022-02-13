@@ -197,6 +197,9 @@ class DashboardController extends Controller
         if (isset($windSensorsData['sensor']))
             $data['windDirection'] = $action->getLatestChartData($windSensorsData);
 
+        $sigmaThetaData = $action->findSensorKey($sensors, 'sigma_theta_(°)');
+        if (isset($sigmaThetaData['sensor']))
+            $data['sigmaTheta'] = $action->getLatestChartData($sigmaThetaData);
         $solarData = $action->findSensorKey($sensors, 'solar_(W/m²)');
 
         if (isset($solarData['sensor'])) {
@@ -222,7 +225,7 @@ class DashboardController extends Controller
 
         if (isset($avgPm25Data['sensor'])) {
             $data['avgPm25Data'] = $action->getAvgData($avgPm25Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
-            $data['pm25ChartData'] = $action->getPm25ChartData($data['avgPm25Data']->avgData);
+            $data['pm25ChartData'] = $action->getPm25ChartData($data['avgPm25Data']->avgData ?? 0);
         }
 
         $avgPm4Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm4.0_(µg/m³)');
@@ -232,7 +235,7 @@ class DashboardController extends Controller
         $avgPm10Data = $action->findSensorKey($sensors, 'avg_mass_concentration_pm10.0_(µg/m³)');
         if (isset($avgPm10Data['sensor'])) {
             $data['avgPm10Data'] = $action->getAvgData($avgPm10Data, [$currentConvertedTime24hourBefore, $currentConvertedTime]);
-            $data['pm10ChartData'] = $action->getPm10ChartData($data['avgPm10Data']->avgData);
+            $data['pm10ChartData'] = $action->getPm10ChartData($data['avgPm10Data']->avgData ?? 0);
         }
 
         if (isset($request->derived_id)) {

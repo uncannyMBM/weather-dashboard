@@ -17,6 +17,12 @@ anychart.onDocumentReady(function () {
 
     gaugeWindDirection.marker().fill('#64b5f6').stroke(null).size('15%').zIndex(120).radius('97%');
 
+    gaugeWindDirection.bar(0)
+        .position("inside")
+        .fill("#F0673B 1")
+        .stroke("#F0673B")
+        .radius(60);
+
     gaugeWindDirection.needle().fill('#1976d2').stroke(null).axisIndex(1).startRadius('6%').endRadius('38%').startWidth('2%').middleWidth(null).endWidth('0');
 
     gaugeWindDirection.cap().radius('4%').fill('#1976d2').enabled(true).stroke(null);

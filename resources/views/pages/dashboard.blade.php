@@ -87,9 +87,18 @@
                 <div class="col-12 col-lg-2 mb-2 mb-lg-0 {{ $i += 2 }}">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
-                                        style="font-size: 16px;">°</sup>
-                            </h6>
+                            <div class="d-flex flex-column flex-md-row justify-content-between">
+                                <div>
+                                    <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
+                                                style="font-size: 16px;">°</sup>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6>Sigma Theta: <span v-cloak>@{{ sigma_theta }}</span><sup
+                                                style="font-size: 16px;">°</sup>
+                                    </h6>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div id="wind-direction-chart" style="width: 100%;height: 300px;"></div>
@@ -1204,6 +1213,7 @@
                 humidity_min: 0,
                 humidity_max: 0,
                 wind_direction: '0',
+                sigma_theta: '0',
                 solar: '0',
                 solar_min: 0,
                 solar_max: 0,
@@ -1284,8 +1294,10 @@
                             }
                             if (_this.is_wind_direction) {
                                 let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
-                                gaugeWindDirection.data([directionData]);
+                                let sigmaThetaData = response.data.sigmaTheta ? response.data.sigmaTheta.data : 0;
+                                gaugeWindDirection.data([directionData, sigmaThetaData]);
                                 _this.wind_direction = directionData;
+                                _this.sigma_theta = sigmaThetaData;
                             }
                             if (_this.is_solar) {
                                 let solarData = response.data.solarData ? response.data.solarData.data : 0;
