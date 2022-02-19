@@ -76,6 +76,13 @@
                                     <h6>Gust Speed: <span v-cloak>@{{ gust_speed }}</span> <sub>(m/s)</sub></h6>
                                 </div>
                             </div>
+                            @if($is_sigma_wind_speed)
+                                <div class="row">
+                                    <div class="col-md-8 offset-md-4">
+                                        <h6>Sigma: <span v-cloak>@{{ sigma_wind_speed }}</span> <sub>(m/s)</sub></h6>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                         <div class="card-body">
                             <div id="wind-gust-speed-chart" style="width: 100%;height: 300px;"></div>
@@ -93,11 +100,13 @@
                                                 style="font-size: 16px;">°</sup>
                                     </h6>
                                 </div>
-                                <div>
-                                    <h6>Sigma Theta: <span v-cloak>@{{ sigma_theta }}</span><sup
-                                                style="font-size: 16px;">°</sup>
-                                    </h6>
-                                </div>
+                                @if($is_sigma_theta)
+                                    <div>
+                                        <h6>Sigma Theta: <span v-cloak>@{{ sigma_theta }}</span><sup
+                                                    style="font-size: 16px;">°</sup>
+                                        </h6>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="card-body">
@@ -1177,12 +1186,14 @@
                 load_time_zone: "",
                 is_air_temp: "{{ $is_air_temp }}",
                 is_wind_speed: "{{ $is_wind_speed }}",
+                is_sigma_wind_speed: "{{ $is_sigma_wind_speed }}",
                 is_gust_speed: "{{ $is_gust_speed }}",
                 is_rain_fall: "{{ $is_rain_fall }}",
                 is_uv: "{{ $is_uv }}",
                 is_atmospheric_pressure: "{{ $is_atmospheric_pressure }}",
                 is_relative_humidity: "{{ $is_relative_humidity }}",
                 is_wind_direction: "{{ $is_wind_direction }}",
+                is_sigma_theta: "{{ $is_sigma_theta }}",
                 is_solar: "{{ $is_solar }}",
                 is_strikes: "{{ $is_strikes }}",
                 is_strike_distance: "{{ $is_strike_distance }}",
@@ -1195,6 +1206,7 @@
                 air_temp_min: 0,
                 air_temp_max: 0,
                 wind_speed: '0',
+                sigma_wind_speed: '0',
                 wind_speed_min: 0,
                 wind_speed_max: 0,
                 gust_speed: '0',
@@ -1264,6 +1276,12 @@
                                 _this.wind_speed_max = response.data.windSpeedMinMax ? response.data.windSpeedMinMax.maxData : 0;
                                 _this.gust_speed_min = response.data.gustSpeedMinMax ? response.data.gustSpeedMinMax.minData : 0;
                                 _this.gust_speed_max = response.data.gustSpeedMinMax ? response.data.gustSpeedMinMax.maxData : 0;
+                                if (_this.is_sigma_wind_speed) {
+                                    let sigmaWindSpeedData = response.data.sigmaWindSpeed ? response.data.sigmaWindSpeed.data : 0;
+                                    sigmaWindSpeed.from(windData - (sigmaWindSpeedData / 2));
+                                    sigmaWindSpeed.to(windData + (sigmaWindSpeedData / 2));
+                                    _this.sigma_wind_speed = sigmaWindSpeedData;
+                                }
                             }
                             if (_this.is_rain_fall) {
                                 let rainData = response.data.rainFallData ? response.data.rainFallData.data : 0;
@@ -1294,10 +1312,14 @@
                             }
                             if (_this.is_wind_direction) {
                                 let directionData = response.data.windDirection ? response.data.windDirection.data : 0;
-                                let sigmaThetaData = response.data.sigmaTheta ? response.data.sigmaTheta.data : 0;
-                                gaugeWindDirection.data([directionData, sigmaThetaData]);
                                 _this.wind_direction = directionData;
-                                _this.sigma_theta = sigmaThetaData;
+                                gaugeWindDirection.data([directionData]);
+                                if (_this.is_sigma_theta) {
+                                    let sigmaThetaData = response.data.sigmaTheta ? response.data.sigmaTheta.data : 0;
+                                    sigmaTheta.from(directionData - (sigmaThetaData / 2));
+                                    sigmaTheta.to(directionData + (sigmaThetaData / 2));
+                                    _this.sigma_theta = sigmaThetaData;
+                                }
                             }
                             if (_this.is_solar) {
                                 let solarData = response.data.solarData ? response.data.solarData.data : 0;

@@ -1,4 +1,5 @@
 var gaugeWindDirection;
+var sigmaTheta;
 anychart.onDocumentReady(function () {
     gaugeWindDirection = anychart.gauges.circular();
 
@@ -8,22 +9,22 @@ anychart.onDocumentReady(function () {
 
     gaugeWindDirection.axis().scale().minimum(0).maximum(360).ticks({interval: 30}).minorTicks({interval: 10});
 
-    gaugeWindDirection.axis().fill('#7c868e').startAngle(0).sweepAngle(-360).width(1).ticks({
+    gaugeWindDirection.axis().fill('#7c868e').startAngle(0).sweepAngle(360).width(1).ticks({
         type: 'line',
         fill: '#7c868e',
         length: 4,
         position: 'outside'
     });
 
-    gaugeWindDirection.marker().fill('#64b5f6').stroke(null).size('15%').zIndex(120).radius('97%');
+    gaugeWindDirection.needle(0).enabled(true).startRadius("0%").middleRadius("40%").endRadius("90%").startWidth(".9").middleWidth("0.6%").endWidth("0.3%").fill('#64b5f6').stroke("none");
 
-    gaugeWindDirection.bar(0)
-        .position("inside")
-        .fill("#F0673B 1")
-        .stroke("#F0673B")
-        .radius(60);
-
-    gaugeWindDirection.needle().fill('#1976d2').stroke(null).axisIndex(1).startRadius('6%').endRadius('38%').startWidth('2%').middleWidth(null).endWidth('0');
+    sigmaTheta = gaugeWindDirection.range();
+    sigmaTheta.from(0);
+    sigmaTheta.to(0);
+    sigmaTheta.fill("#F0673B 1");
+    sigmaTheta.radius(60);
+    sigmaTheta.startSize(3);
+    sigmaTheta.endSize(3);
 
     gaugeWindDirection.cap().radius('4%').fill('#1976d2').enabled(true).stroke(null);
 

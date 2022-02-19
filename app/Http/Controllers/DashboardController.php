@@ -39,12 +39,14 @@ class DashboardController extends Controller
 
         $airTempData = $action->findSensorKey($sensors, 'air_temperature_(°C)');
         $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
+        $sigmaWindSpeedData = $action->findSensorKey($sensors, 'sigma_wind_speed_(m/s)');
         $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
         $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
         $uvData = $action->findSensorKey($sensors, 'uv_index');
         $atmosphericPressureData = $action->findSensorKey($sensors, 'atmospheric_pressure_(hPa)');
         $relativeHumidityData = $action->findSensorKey($sensors, 'relative_humidity_(%)');
         $windSensorsData = $action->findSensorKey($sensors, 'wind_direction_(°)');
+        $sigmaThetaData = $action->findSensorKey($sensors, 'sigma_theta_(°)');
         $solarSensorsData = $action->findSensorKey($sensors, 'solar_(W/m²)');
         $strikesSensorsData = $action->findSensorKey($sensors, 'strikes');
         $strikeDistanceSensorsData = $action->findSensorKey($sensors, 'strike_distance_(Km)');
@@ -62,6 +64,7 @@ class DashboardController extends Controller
 
         $data['is_air_temp'] = isset($airTempData['sensor']) ? true : false;
         $data['is_wind_speed'] = isset($windSpeedData['sensor']) ? true : false;
+        $data['is_sigma_wind_speed'] = isset($sigmaWindSpeedData['sensor']) ? true : false;
         $data['is_gust_speed'] = isset($gustSpeedData['sensor']) ? true : false;
         $data['is_rain_fall'] = isset($rainFallData['sensor']) ? true : false;
 
@@ -80,6 +83,7 @@ class DashboardController extends Controller
         }
 
         $data['is_wind_direction'] = isset($windSensorsData['sensor']) ? true : false;
+        $data['is_sigma_theta'] = isset($sigmaThetaData['sensor']) ? true : false;
         $data['is_solar'] = isset($solarSensorsData['sensor']) ? true : false;
         $data['is_strikes'] = isset($strikesSensorsData['sensor']) ? true : false;
         $data['is_strike_distance'] = isset($strikeDistanceSensorsData['sensor']) ? true : false;
@@ -137,7 +141,6 @@ class DashboardController extends Controller
             $data['airTempMinMax'] = $action->getMinMaxData($airTempData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
-
         $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
 
         if (isset($windSpeedData['sensor'])) {
@@ -153,6 +156,10 @@ class DashboardController extends Controller
             $data['gustSpeedMinMax'] = $action->getMinMaxData($gustSpeedData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
         }
 
+        $sigmaWindSpeedData = $action->findSensorKey($sensors, 'sigma_wind_speed_(m/s)');
+
+        if (isset($sigmaWindSpeedData['sensor']))
+            $data['sigmaWindSpeed'] = $action->getLatestChartData($sigmaWindSpeedData);
 
         $rainFallData = $action->findSensorKey($sensors, 'precipitation_(mm)');
 
@@ -200,6 +207,7 @@ class DashboardController extends Controller
         $sigmaThetaData = $action->findSensorKey($sensors, 'sigma_theta_(°)');
         if (isset($sigmaThetaData['sensor']))
             $data['sigmaTheta'] = $action->getLatestChartData($sigmaThetaData);
+
         $solarData = $action->findSensorKey($sensors, 'solar_(W/m²)');
 
         if (isset($solarData['sensor'])) {

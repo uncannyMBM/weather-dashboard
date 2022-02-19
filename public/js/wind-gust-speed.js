@@ -1,4 +1,5 @@
 var gaugeWindGustSpeed;
+var sigmaWindSpeed;
 anychart.onDocumentReady(function () {
     gaugeWindGustSpeed = anychart.gauges.circular();
 
@@ -28,6 +29,14 @@ anychart.onDocumentReady(function () {
     gaugeWindGustSpeed.needle(0).enabled(true).startRadius("0%").endRadius("90%").middleRadius(0).endWidth("0.1%").fill('#64b5f6').stroke("none").middleWidth(null);
 
     gaugeWindGustSpeed.needle(1).enabled(true).startRadius("0%").endRadius("90%").middleRadius(0).endWidth("0.1%").fill("#e74c3c").stroke("none").middleWidth(null);
+
+    sigmaWindSpeed = gaugeWindGustSpeed.range();
+    sigmaWindSpeed.from(0);
+    sigmaWindSpeed.to(0);
+    sigmaWindSpeed.fill("#EF9900 1");
+    sigmaWindSpeed.radius(60);
+    sigmaWindSpeed.startSize(3);
+    sigmaWindSpeed.endSize(3);
 
     gaugeWindGustSpeed.cap().radius('4%').fill('#ffffff').enabled(true).stroke('#1976d2');
 
