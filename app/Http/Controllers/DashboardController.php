@@ -16,7 +16,7 @@ class DashboardController extends Controller
         return view('pages.index', compact('bases'));
     }
 
-    public function dashboard(Request $request, DashboardAction $action, $id, $tag)
+    public function dashboard(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -108,6 +108,8 @@ class DashboardController extends Controller
         } else {
             $data['is_fdi'] = false;
         }
+
+        $data['api_key'] = $request->api_key;
         return view('pages.dashboard', $data);
     }
 
@@ -408,7 +410,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalChart(DashboardAction $action, $id, $chart)
+    public function historicalChart(Request $request, DashboardAction $action, $id, $chart)
     {
         $chartContainer = [
             'rainfall-raw' => ['precipitation_(mm)'],
@@ -439,8 +441,8 @@ class DashboardController extends Controller
 
         $sensorKey = $findSensor['key'];
         $paramId = $findSensor['sensor']->id;
-
-        return view('pages.single-chart', compact('id', 'chart', 'sensorKey', 'singleParam', 'paramId'));
+        $api_key = $request->api_key;
+        return view('pages.single-chart', compact('id', 'chart', 'sensorKey', 'singleParam', 'paramId', 'api_key'));
     }
 
     public function getSingleChartData(Request $request)
@@ -464,7 +466,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalGuastWindChart(DashboardAction $action, $id)
+    public function historicalGuastWindChart(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -473,8 +475,8 @@ class DashboardController extends Controller
         $gustData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
 
         abort_if(!isset($winData['sensor'], $gustData['sensor']), 404);
-
-        return view('pages.gust-wind', compact('id'));
+        $api_key = $request->api_key;
+        return view('pages.gust-wind', compact('id', 'api_key'));
     }
 
     public function getGuastWindChartData(Request $request, DashboardAction $action)
@@ -508,7 +510,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalRainfallDailyChart(DashboardAction $action, $id)
+    public function historicalRainfallDailyChart(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -520,8 +522,8 @@ class DashboardController extends Controller
 
         $sensorKey = $rainFall['key'];
         $paramId = $rainFall['sensor']->id;
-
-        return view('pages.rainfall-daily', compact('id', 'sensorKey', 'paramId'));
+        $api_key = $request->api_key;
+        return view('pages.rainfall-daily', compact('id', 'sensorKey', 'paramId', 'api_key'));
     }
 
     public function getRainfallChartDailyData(Request $request)
@@ -562,7 +564,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalRainfallMonthlyChart(DashboardAction $action, $id)
+    public function historicalRainfallMonthlyChart(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -574,8 +576,8 @@ class DashboardController extends Controller
 
         $sensorKey = $rainFall['key'];
         $paramId = $rainFall['sensor']->id;
-
-        return view('pages.rainfall-monthly', compact('id', 'sensorKey', 'paramId'));
+        $api_key = $request->api_key;
+        return view('pages.rainfall-monthly', compact('id', 'sensorKey', 'paramId', 'api_key'));
     }
 
     public function getRainfallChartMonthlyData(Request $request)
@@ -616,7 +618,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalCombineChart(DashboardAction $action, $id)
+    public function historicalCombineChart(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -658,6 +660,7 @@ class DashboardController extends Controller
         $data['is_avg_pm4'] = isset($avgPm4Data['sensor']) ? true : false;
         $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
         $data['id'] = $id;
+        $data['api_key'] = $request->api_key;
         return view('pages.combine', $data);
     }
 
@@ -774,7 +777,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    public function historicalWindRoseChart(DashboardAction $action, $id)
+    public function historicalWindRoseChart(Request $request, DashboardAction $action, $id)
     {
         abort_if(!in_array($id, config('basestations.allow')), 404);
 
@@ -783,8 +786,8 @@ class DashboardController extends Controller
         $windSpeedData = $action->findSensorKey($sensors, 'wind_speed_(m/s)');
 
         abort_if(!isset($winDirectionData['sensor'], $windSpeedData['sensor']), 404);
-
-        return view('pages.wind-rose', compact('id'));
+        $api_key = $request->api_key;
+        return view('pages.wind-rose', compact('id', 'api_key'));
     }
 
     public function calulateSpeedWithDirection(Request $request, DashboardAction $action)

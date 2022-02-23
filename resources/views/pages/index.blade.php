@@ -23,7 +23,8 @@
                         <td>{{ $base->name }}</td>
                         <td>
                             @if(in_array($base->id, config('basestations.allow')))
-                                <a href="{{ route('dashboard', [$base->id, $base->tag]) }}" class="btn btn-sm btn-info">Dashboard</a>
+                                <a href="{{ route('dashboard', ['id' => $base->id, 'api_key' => \Illuminate\Support\Facades\Crypt::encrypt('s4B96hTKaZ53nvQ3OS8xz5sGU2wjSynh6twikj30QuQs0RbYgOHcNTrcjFz0')]) }}"
+                                   class="btn btn-sm btn-info">Dashboard</a>
                             @endif
                         </td>
                     </tr>

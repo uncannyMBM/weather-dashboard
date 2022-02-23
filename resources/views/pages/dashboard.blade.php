@@ -474,7 +474,7 @@
                     <div class="card-body">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                             @if($is_rain_fall)
-                                <a href="{{ route('historical.chart', [$base->id, 'rainfall-raw']) }}" class="btn">
+                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'rainfall-raw', 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall Raw
@@ -482,7 +482,7 @@
                                         </div>
                                     </div>
                                 </a>
-                                <a href="{{ route('historical.rainfall.daily.chart', $base->id) }}" class="btn">
+                                <a href="{{ route('historical.rainfall.daily.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
@@ -491,7 +491,7 @@
                                         </div>
                                     </div>
                                 </a>
-                                <a href="{{ route('historical.rainfall.monthly.chart', $base->id) }}" class="btn">
+                                <a href="{{ route('historical.rainfall.monthly.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
@@ -502,7 +502,7 @@
                                 </a>
                             @endif
                             @if($is_air_temp)
-                                <a href="{{ route('historical.chart', [$base->id, 'temperature']) }}" class="btn">
+                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'temperature', 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-temperature-high fa-2x"></i>
@@ -513,7 +513,7 @@
                                 </a>
                             @endif
                             @if($is_atmospheric_pressure)
-                                <a href="{{ route('historical.chart', [$base->id, 'msl-pressure']) }}" class="btn">
+                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'msl-pressure', 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-tire-pressure-warning fa-2x"></i>
@@ -523,7 +523,7 @@
                                 </a>
                             @endif
                             @if($is_relative_humidity)
-                                <a href="{{ route('historical.chart', [$base->id, 'humidity']) }}" class="btn">
+                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'humidity', 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-cloud-sun fa-2x"></i> Humidity</h6>
@@ -532,7 +532,7 @@
                                 </a>
                             @endif
                             @if($is_wind_direction)
-                                <a href="{{ route('historical.wind.rose.chart', $base->id) }}" class="btn">
+                                <a href="{{ route('historical.wind.rose.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Wind Rose</h6>
@@ -541,7 +541,7 @@
                                 </a>
                             @endif
                             @if($is_wind_speed && $is_gust_speed)
-                                <a href="{{ route('historical.guast.wind.chart', $base->id) }}" class="btn">
+                                <a href="{{ route('historical.guast.wind.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Guast and Wind</h6>
@@ -549,7 +549,7 @@
                                     </div>
                                 </a>
                             @endif
-                            <a href="{{ route('historical.combine.chart', $base->id) }}" class="btn">
+                            <a href="{{ route('historical.combine.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
                                 <div class="card">
                                     <div class="card-body">
                                         <h6 class="card-title"><i class="fas fa-chart-bar fa-2x"></i> Combine Chart</h6>
@@ -739,7 +739,7 @@
                     $.ajax({
                         url: "{{ route('get.avg.pm.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
@@ -868,7 +868,7 @@
                     $.ajax({
                         url: "{{ route('get.max.pm.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
@@ -992,7 +992,7 @@
                     $.ajax({
                         url: "{{ route('get.solar.voltage.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
                         success: function (response) {
                             Highcharts.chart('solar_voltage_chart', {
                                 chart: {
@@ -1100,7 +1100,7 @@
                     $.ajax({
                         url: "{{ route('get.solar.uv.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}"},
+                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
                         success: function (response) {
                             Highcharts.chart('solar_uv_chart', {
                                 chart: {
@@ -1255,7 +1255,8 @@
                             id: "{{ $base->id }}",
                             currentTime: currentTime,
                             timeZone: _this.timeZone,
-                            derived_id: "{{ isset($derived_id) ? $derived_id : null }}"
+                            derived_id: "{{ isset($derived_id) ? $derived_id : null }}",
+                            api_key: "{{ $api_key }}"
                         }
                     })
                         .then((response) => {

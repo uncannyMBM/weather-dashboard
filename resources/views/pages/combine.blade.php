@@ -83,7 +83,7 @@
                 $.ajax({
                     url: "{{ route('get.combine.chart.data') }}",
                     method: "GET",
-                    data: {dateData: dateData, timeZone: timeZone, id: "{{ $id }}"},
+                    data: {dateData: dateData, timeZone: timeZone, id: "{{ $id }}", api_key: "{{ $api_key }}"},
                     success: function (response) {
                         let chartSeries = [];
                         let xSeries = [];

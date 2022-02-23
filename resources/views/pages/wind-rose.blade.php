@@ -68,7 +68,8 @@
                     data: {
                         dateData: fromDate,
                         timeZone: timeZone,
-                        id: "{{ $id }}"
+                        id: "{{ $id }}",
+                        api_key: "{{ $api_key }}"
                     },
                     success: function (response) {
                         historical_zoomed_chart_instance = {

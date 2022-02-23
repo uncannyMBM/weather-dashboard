@@ -102,7 +102,8 @@
                         dateData: {fromDate, toDate},
                         timeZone: timeZone,
                         key: "{{ $sensorKey }}",
-                        id: "{{ $paramId }}"
+                        id: "{{ $paramId }}",
+                        api_key: "{{ $api_key }}"
                     },
                     success: function (response) {
                         Highcharts.chart('single_chart', {
