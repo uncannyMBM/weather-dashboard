@@ -22,29 +22,29 @@
                 <div class="p-3 px-md-4 mb-3 bg-secondary border-bottom box-shadow">
                     <ul class="mb-0 list-inline d-flex flex-column flex-md-row justify-content-between align-items-center">
                         <li class="list-inline-item text-white">State: <span
-                                    class="text-warning">{{ $base->status == 1 ? 'Active' : ($base->status == 2 ? 'Data Fault' : ($base->status == 3 ? 'Inactive' : (($base->status == 4 ? 'No Data' : (($base->status == 6 ? 'Terminated' : '')))))) }}</span>
+                                class="text-warning">{{ $base->status == 1 ? 'Active' : ($base->status == 2 ? 'Data Fault' : ($base->status == 3 ? 'Inactive' : (($base->status == 4 ? 'No Data' : (($base->status == 6 ? 'Terminated' : '')))))) }}</span>
                         </li>
                         <li class="list-inline-item text-white">Base Station Name: <span
-                                    class="text-warning">{{ $base->name }}</span>
+                                class="text-warning">{{ $base->name }}</span>
                         </li>
                         <li class="list-inline-item text-white">Battery voltage:
                             <span class="text-warning">{{ $baseParams->battery_voltage }} V</span></li>
                         <li class="list-inline-item text-white">RSSI: <span
-                                    class="text-warning">{{ $baseParams->rssi }}</span>
+                                class="text-warning">{{ $baseParams->rssi }}</span>
                         </li>
                         <li class="list-inline-item text-white">External Power: <span
-                                    class="text-warning">{{ $baseParams->is_external_power_available == 1 ? 'Yes' : 'No' }}</span>
+                                class="text-warning">{{ $baseParams->is_external_power_available == 1 ? 'Yes' : 'No' }}</span>
                         </li>
                         <li class="list-inline-item text-white">Charging: <span
-                                    class="text-warning">{{ $baseParams->is_charging == 1 ? 'Yes' : 'No' }}</span></li>
+                                class="text-warning">{{ $baseParams->is_charging == 1 ? 'Yes' : 'No' }}</span></li>
                         <li class="list-inline-item text-white">Data Transfer Mode: <span
-                                    class="text-warning">{{ $baseParams->primary_data_source_types_id == 4 ? 'MQTT Mode' : ' ' }}</span>
+                                class="text-warning">{{ $baseParams->primary_data_source_types_id == 4 ? 'MQTT Mode' : ' ' }}</span>
                         </li>
                         <li class="list-inline-item text-white">At: <span
-                                    class="text-warning" v-cloak>@{{ load_time_zone }}</span>
+                                class="text-warning" v-cloak>@{{ load_time_zone }}</span>
                         </li>
                         <li class="list-inline-item text-white">Timezone: <span
-                                    class="text-warning" v-cloak>@{{ timeZone }}</span>
+                                class="text-warning" v-cloak>@{{ timeZone }}</span>
                         </li>
                     </ul>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h6>Air Temp: <span v-cloak>@{{ air_temp }}</span><sup
-                                        style="font-size: 16px;">°</sup></h6>
+                                    style="font-size: 16px;">°</sup></h6>
                         </div>
                         <div class="card-body">
                             <div id="air-temp-chart" style="width: 100%;height: 300px;"></div>
@@ -97,13 +97,13 @@
                             <div class="d-flex flex-column flex-md-row justify-content-between">
                                 <div>
                                     <h6>Wind Direction: <span v-cloak>@{{ wind_direction }}</span><sup
-                                                style="font-size: 16px;">°</sup>
+                                            style="font-size: 16px;">°</sup>
                                     </h6>
                                 </div>
                                 @if($is_sigma_theta)
                                     <div>
                                         <h6>Sigma Theta: <span v-cloak>@{{ sigma_theta }}</span><sup
-                                                    style="font-size: 16px;">°</sup>
+                                                style="font-size: 16px;">°</sup>
                                         </h6>
                                     </div>
                                 @endif
@@ -380,7 +380,7 @@
                                         <h6 class="card-title">Temperature Min</h6>
                                         <p class="card-text blue-text"><i class="fas fa-temperature-low fa-2x"></i>
                                             <span class="ml-2" v-cloak style="font-size: 30px;">@{{ air_temp_min }}<sup
-                                                        style="font-size: 16px;">°</sup></span>
+                                                    style="font-size: 16px;">°</sup></span>
                                         </p>
                                     </div>
                                 </div>
@@ -389,7 +389,7 @@
                                         <h6 class="card-title">Temperature Max</h6>
                                         <p class="card-text blue-text"><i class="fas fa-temperature-high fa-2x"></i>
                                             <span class="ml-2" v-cloak style="font-size: 30px;">@{{ air_temp_max }}<sup
-                                                        style="font-size: 16px;">°</sup></span>
+                                                    style="font-size: 16px;">°</sup></span>
                                         </p>
                                     </div>
                                 </div>
@@ -399,7 +399,7 @@
                                     <div class="card-body">
                                         <h6 class="card-title">MSL Pressure Min</h6>
                                         <p class="card-text blue-text"><i
-                                                    class="fas fa-tire-pressure-warning fa-2x"></i>
+                                                class="fas fa-tire-pressure-warning fa-2x"></i>
                                             <span class="ml-2" v-cloak
                                                   style="font-size: 30px;">@{{ msl_pressure_min }}</span> hPa
                                         </p>
@@ -409,7 +409,7 @@
                                     <div class="card-body">
                                         <h6 class="card-title">MSL Pressure Max</h6>
                                         <p class="card-text blue-text"><i
-                                                    class="fas fa-tire-pressure-warning fa-2x"></i>
+                                                class="fas fa-tire-pressure-warning fa-2x"></i>
                                             <span class="ml-2" v-cloak
                                                   style="font-size: 30px;">@{{ msl_pressure_max }}</span> hPa
                                         </p>
@@ -474,88 +474,162 @@
                     <div class="card-body">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                             @if($is_rain_fall)
-                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'rainfall-raw', 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.chart', [$base->id, 'rainfall-raw']) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall Raw
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-cloud-rain fa-2x"></i> Rainfall Raw
+                                                </button>
                                             </h6>
                                         </div>
                                     </div>
-                                </a>
-                                <a href="{{ route('historical.rainfall.daily.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
+                                </form>
+                                <form method="post"
+                                      action="{{ route('historical.rainfall.daily.chart', $base->id) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
-                                                Daily
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-cloud-rain fa-2x"></i> Rainfall Daily
+                                                </button>
                                             </h6>
                                         </div>
                                     </div>
-                                </a>
-                                <a href="{{ route('historical.rainfall.monthly.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
+                                </form>
+                                <form method="post"
+                                      action="{{ route('historical.rainfall.monthly.chart', $base->id) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-cloud-rain fa-2x"></i> Rainfall
-                                                Monthly
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-cloud-rain fa-2x"></i> Rainfall Monthly
+                                                </button>
                                             </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
                             @if($is_air_temp)
-                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'temperature', 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'temperature']) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-temperature-high fa-2x"></i>
-                                                Temperature
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-temperature-high fa-2x"></i> Temperature
+                                                </button>
                                             </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
                             @if($is_atmospheric_pressure)
-                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'msl-pressure', 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'msl-pressure']) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-tire-pressure-warning fa-2x"></i>
-                                                MSL Pressure</h6>
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-tire-pressure-warning fa-2x"></i>
+                                                    MSL Pressure
+                                                </button>
+                                            </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
                             @if($is_relative_humidity)
-                                <a href="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'humidity', 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.chart', ['id' => $base->id, 'chart' => 'humidity']) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-cloud-sun fa-2x"></i> Humidity</h6>
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-cloud-sun fa-2x"></i> Humidity
+                                                </button>
+                                            </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
                             @if($is_wind_direction)
-                                <a href="{{ route('historical.wind.rose.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.wind.rose.chart', $base->id) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Wind Rose</h6>
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-wind fa-2x"></i> Wind Rose
+                                                </button>
+                                            </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
                             @if($is_wind_speed && $is_gust_speed)
-                                <a href="{{ route('historical.guast.wind.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
+                                <form method="post"
+                                      action="{{ route('historical.guast.wind.chart', $base->id) }}">
+                                    @csrf
+                                    <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                    <input type="hidden" id="api_token" name="api_key"
+                                           value="{{ $api_key }}">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6 class="card-title"><i class="fas fa-wind fa-2x"></i> Guast and Wind</h6>
+                                            <h6 class="card-title">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-wind fa-2x"></i> Guast and Wind
+                                                </button>
+                                            </h6>
                                         </div>
                                     </div>
-                                </a>
+                                </form>
                             @endif
-                            <a href="{{ route('historical.combine.chart', ['id' => $base->id, 'api_key' => $api_key]) }}" class="btn">
+                            <form method="post"
+                                  action="{{ route('historical.combine.chart', $base->id) }}">
+                                @csrf
+                                <input type="hidden" id="user_name" name="user_name" value="{{ $userName }}">
+                                <input type="hidden" id="api_token" name="api_key"
+                                       value="{{ $api_key }}">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title"><i class="fas fa-chart-bar fa-2x"></i> Combine Chart</h6>
+                                        <h6 class="card-title">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-chart-bar fa-2x"></i> Combine Chart
+                                            </button>
+                                        </h6>
                                     </div>
                                 </div>
-                            </a>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -739,7 +813,12 @@
                     $.ajax({
                         url: "{{ route('get.avg.pm.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
+                        data: {
+                            dateData: dateData,
+                            timeZone: timeZone,
+                            id: "{{ $base->id }}",
+                            api_key: "{{ $api_key }}"
+                        },
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
@@ -868,7 +947,12 @@
                     $.ajax({
                         url: "{{ route('get.max.pm.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
+                        data: {
+                            dateData: dateData,
+                            timeZone: timeZone,
+                            id: "{{ $base->id }}",
+                            api_key: "{{ $api_key }}"
+                        },
                         success: function (response) {
                             let pmSeries = [];
                             let pmColors = [];
@@ -992,7 +1076,12 @@
                     $.ajax({
                         url: "{{ route('get.solar.voltage.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
+                        data: {
+                            dateData: dateData,
+                            timeZone: timeZone,
+                            id: "{{ $base->id }}",
+                            api_key: "{{ $api_key }}"
+                        },
                         success: function (response) {
                             Highcharts.chart('solar_voltage_chart', {
                                 chart: {
@@ -1100,7 +1189,12 @@
                     $.ajax({
                         url: "{{ route('get.solar.uv.chart.data') }}",
                         method: "GET",
-                        data: {dateData: dateData, timeZone: timeZone, id: "{{ $base->id }}", api_key: "{{ $api_key }}"},
+                        data: {
+                            dateData: dateData,
+                            timeZone: timeZone,
+                            id: "{{ $base->id }}",
+                            api_key: "{{ $api_key }}"
+                        },
                         success: function (response) {
                             Highcharts.chart('solar_uv_chart', {
                                 chart: {

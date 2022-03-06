@@ -110,6 +110,7 @@ class DashboardController extends Controller
         }
 
         $data['api_key'] = $request->api_key;
+        $data['userName'] = $request->user_name;
         return view('pages.dashboard', $data);
     }
 

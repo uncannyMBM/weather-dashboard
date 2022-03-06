@@ -18,7 +18,7 @@ class CheckApiKey
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!$request->has('api_key')) {
+        if (!$request->has('api_key') || !$request->has('user_name')) {
             if ($request->ajax()) {
                 return response()->json('Unauthenticated', 401);
             } else {
@@ -26,8 +26,7 @@ class CheckApiKey
             }
         }
 
-        $apiKey = Crypt::decrypt($request->api_key);
-        $user = User::where('api_token', $apiKey)->first();
+        $user = User::where(['email' => $request->user_name, 'api_token' => $request->api_key])->first();
         if (!$user) {
             if ($request->ajax()) {
                 return response()->json('Unauthenticated', 401);
