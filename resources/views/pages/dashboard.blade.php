@@ -817,7 +817,8 @@
                             dateData: dateData,
                             timeZone: timeZone,
                             id: "{{ $base->id }}",
-                            api_key: "{{ $api_key }}"
+                            api_key: "{{ $api_key }}",
+                            user_name: "{{ $userName }}"
                         },
                         success: function (response) {
                             let pmSeries = [];
@@ -951,7 +952,8 @@
                             dateData: dateData,
                             timeZone: timeZone,
                             id: "{{ $base->id }}",
-                            api_key: "{{ $api_key }}"
+                            api_key: "{{ $api_key }}",
+                            user_name: "{{ $userName }}"
                         },
                         success: function (response) {
                             let pmSeries = [];
@@ -1080,7 +1082,8 @@
                             dateData: dateData,
                             timeZone: timeZone,
                             id: "{{ $base->id }}",
-                            api_key: "{{ $api_key }}"
+                            api_key: "{{ $api_key }}",
+                            user_name: "{{ $userName }}"
                         },
                         success: function (response) {
                             Highcharts.chart('solar_voltage_chart', {
@@ -1193,7 +1196,8 @@
                             dateData: dateData,
                             timeZone: timeZone,
                             id: "{{ $base->id }}",
-                            api_key: "{{ $api_key }}"
+                            api_key: "{{ $api_key }}",
+                            user_name: "{{ $userName }}"
                         },
                         success: function (response) {
                             Highcharts.chart('solar_uv_chart', {
@@ -1350,7 +1354,8 @@
                             currentTime: currentTime,
                             timeZone: _this.timeZone,
                             derived_id: "{{ isset($derived_id) ? $derived_id : null }}",
-                            api_key: "{{ $api_key }}"
+                            api_key: "{{ $api_key }}",
+                            user_name: "{{ $userName }}"
                         }
                     })
                         .then((response) => {

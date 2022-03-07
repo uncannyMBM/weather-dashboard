@@ -71,7 +71,7 @@
                 $.ajax({
                     url: "{{ route('get.single.chart.data') }}",
                     method: "GET",
-                    data: {dateData: dateData, timeZone: timeZone, key: "{{ $sensorKey }}", id: "{{ $paramId }}", api_key: "{{ $api_key }}"},
+                    data: {dateData: dateData, timeZone: timeZone, key: "{{ $sensorKey }}", id: "{{ $paramId }}", api_key: "{{ $api_key }}", user_name: "{{ $userName }}"},
                     success: function (response) {
                         Highcharts.chart('single_chart', {
                             chart: {

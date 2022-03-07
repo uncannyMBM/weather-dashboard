@@ -103,7 +103,8 @@
                         timeZone: timeZone,
                         key: "{{ $sensorKey }}",
                         id: "{{ $paramId }}",
-                        api_key: "{{ $api_key }}"
+                        api_key: "{{ $api_key }}",
+                        user_name: "{{ $userName }}"
                     },
                     success: function (response) {
                         Highcharts.chart('single_chart', {

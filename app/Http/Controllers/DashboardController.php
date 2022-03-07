@@ -443,7 +443,8 @@ class DashboardController extends Controller
         $sensorKey = $findSensor['key'];
         $paramId = $findSensor['sensor']->id;
         $api_key = $request->api_key;
-        return view('pages.single-chart', compact('id', 'chart', 'sensorKey', 'singleParam', 'paramId', 'api_key'));
+        $userName = $request->user_name;
+        return view('pages.single-chart', compact('id', 'chart', 'sensorKey', 'singleParam', 'paramId', 'api_key', 'userName'));
     }
 
     public function getSingleChartData(Request $request)
@@ -477,7 +478,8 @@ class DashboardController extends Controller
 
         abort_if(!isset($winData['sensor'], $gustData['sensor']), 404);
         $api_key = $request->api_key;
-        return view('pages.gust-wind', compact('id', 'api_key'));
+        $userName = $request->user_name;
+        return view('pages.gust-wind', compact('id', 'api_key', 'userName'));
     }
 
     public function getGuastWindChartData(Request $request, DashboardAction $action)
@@ -524,7 +526,8 @@ class DashboardController extends Controller
         $sensorKey = $rainFall['key'];
         $paramId = $rainFall['sensor']->id;
         $api_key = $request->api_key;
-        return view('pages.rainfall-daily', compact('id', 'sensorKey', 'paramId', 'api_key'));
+        $userName = $request->user_name;
+        return view('pages.rainfall-daily', compact('id', 'sensorKey', 'paramId', 'api_key', 'userName'));
     }
 
     public function getRainfallChartDailyData(Request $request)
@@ -578,7 +581,8 @@ class DashboardController extends Controller
         $sensorKey = $rainFall['key'];
         $paramId = $rainFall['sensor']->id;
         $api_key = $request->api_key;
-        return view('pages.rainfall-monthly', compact('id', 'sensorKey', 'paramId', 'api_key'));
+        $userName = $request->user_name;
+        return view('pages.rainfall-monthly', compact('id', 'sensorKey', 'paramId', 'api_key', 'userName'));
     }
 
     public function getRainfallChartMonthlyData(Request $request)
@@ -662,6 +666,7 @@ class DashboardController extends Controller
         $data['is_avg_pm10'] = isset($avgPm10Data['sensor']) ? true : false;
         $data['id'] = $id;
         $data['api_key'] = $request->api_key;
+        $data['userName'] = $request->user_name;
         return view('pages.combine', $data);
     }
 
@@ -788,7 +793,8 @@ class DashboardController extends Controller
 
         abort_if(!isset($winDirectionData['sensor'], $windSpeedData['sensor']), 404);
         $api_key = $request->api_key;
-        return view('pages.wind-rose', compact('id', 'api_key'));
+        $userName = $request->user_name;
+        return view('pages.wind-rose', compact('id', 'api_key', 'userName'));
     }
 
     public function calulateSpeedWithDirection(Request $request, DashboardAction $action)
