@@ -57,10 +57,45 @@ class SendMonthlyRainfallReport extends Command
           base_stations.status,
           base_stations.status_log as value'))
                     ->where('companies.id', $companyid)
+                    ->whereIn('base_stations.iot_endpoint_model_id', [13, 14, 16])
                     ->whereNull('base_stations.deleted_at')
                     ->get();
+                $report = [];
+                foreach ($data as $sensors) {
+                    $sensorValues = json_decode($sensors->value);
+                    foreach ($sensorValues->latestData as $sensorDetails) {
+                        if (isset($sensorDetails->sensorsId)) {
+                            $sensor = DB::table('base_station_sensors')
+                                ->select('id', 'base_station_id', 'parameters')
+                                ->find($sensorDetails->sensorsId);
 
-                $dompdf = DomPDF::loadView('report.monthlyEmailReport', compact('company', 'data'));
+                            $parameters = array_map('trim', explode(",", $sensor->parameters));
+                            $sensorKey = array_search('precipitation_(mm)', $parameters);
+                            if ($sensorKey > -1) {
+                                $key = $sensorKey + 1;
+                                $rainFallSumMonthly = DB::table('base_station_sensors_data')
+                                    ->selectRaw('id ,sensors_id, ROUND(SUM(D' . $key . '), 2) AS data')
+                                    ->where('sensors_id', $sensor->id)
+                                    ->whereBetween('created_at', [today()->subMonth()->startOfMonth(), today()->subMonth()->endOfMonth()])
+                                    ->groupBy('sensors_id')
+                                    ->first();
+                                $rainFallSumYearly = DB::table('base_station_sensors_data')
+                                    ->selectRaw('id ,sensors_id, ROUND(SUM(D' . $key . '), 2) AS data')
+                                    ->where('sensors_id', $sensor->id)
+                                    ->whereYear('created_at', today()->subMonth()->format('Y'))
+                                    ->groupBy('sensors_id')
+                                    ->first();
+                                $report[] = [
+                                    'sensor_name' => $sensors->nam,
+                                    'rainfall_monthly' => $rainFallSumMonthly->data ?? 0,
+                                    'rainfall_yearly' => $rainFallSumYearly->data ?? 0,
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                $dompdf = DomPDF::loadView('pdf.monthlyEmailReport', compact('company', 'report'));
                 $dompdf->setPaper('A3', 'landscape');
                 $pdf = $dompdf->output();
                 $data = [
@@ -68,7 +103,7 @@ class SendMonthlyRainfallReport extends Command
                     'company_name' => $user->name,
                     'user_name' => $user->full_name,
                 ];
-                Mail::send('report.emailbody', $data, function ($message) use ($user, $pdf) {
+                Mail::send('report.rainfallEmailBody', $data, function ($message) use ($user, $pdf) {
                     $message->from('mdkamruzzaman@ontoto.com', 'Ontoto Pty Ltd.');
                     $message->subject('Monthly RainFall Report');
                     $message->to($user->email)->cc($user->ccemail ?: []);
