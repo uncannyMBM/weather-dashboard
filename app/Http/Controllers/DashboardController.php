@@ -286,10 +286,10 @@ class DashboardController extends Controller
         $pm10 = [];
         foreach ($avgData as $avg) {
             $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $avg->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
-            $pm1[] = [$labels, isset($avg->pm1) ? floatval($avg->pm1) : ''];
-            $pm25[] = [$labels, isset($avg->pm25) ? floatval($avg->pm25) : ''];
-            $pm4[] = [$labels, isset($avg->pm4) ? floatval($avg->pm4) : ''];
-            $pm10[] = [$labels, isset($avg->pm10) ? floatval($avg->pm10) : ''];
+            $pm1[] = [$labels, isset($avg->pm1) ? floatval($avg->pm1) : 0];
+            $pm25[] = [$labels, isset($avg->pm25) ? floatval($avg->pm25) : 0];
+            $pm4[] = [$labels, isset($avg->pm4) ? floatval($avg->pm4) : 0];
+            $pm10[] = [$labels, isset($avg->pm10) ? floatval($avg->pm10) : 0];
         }
         $data['pm1'] = $pm1;
         $data['pm25'] = $pm25;
@@ -327,10 +327,10 @@ class DashboardController extends Controller
         $pm10 = [];
         foreach ($maxData as $max) {
             $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $max->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
-            $pm1[] = [$labels, isset($max->pm1) ? floatval($max->pm1) : ''];
-            $pm25[] = [$labels, isset($max->pm25) ? floatval($max->pm25) : ''];
-            $pm4[] = [$labels, isset($max->pm4) ? floatval($max->pm4) : ''];
-            $pm10[] = [$labels, isset($max->pm10) ? floatval($max->pm10) : ''];
+            $pm1[] = [$labels, isset($max->pm1) ? floatval($max->pm1) : 0];
+            $pm25[] = [$labels, isset($max->pm25) ? floatval($max->pm25) : 0];
+            $pm4[] = [$labels, isset($max->pm4) ? floatval($max->pm4) : 0];
+            $pm10[] = [$labels, isset($max->pm10) ? floatval($max->pm10) : 0];
         }
         $data['pm1'] = $pm1;
         $data['pm25'] = $pm25;
@@ -403,8 +403,8 @@ class DashboardController extends Controller
         $uv = [];
         foreach ($allData as $singleData) {
             $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
-            $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : ''];
-            $uv[] = [$labels, isset($singleData->uv) ? floatval($singleData->uv) : ''];
+            $solar[] = [$labels, isset($singleData->solar) ? floatval($singleData->solar) : 0];
+            $uv[] = [$labels, isset($singleData->uv) ? floatval($singleData->uv) : 0];
         }
         $data['solar'] = $solar;
         $data['uv'] = $uv;
@@ -505,8 +505,8 @@ class DashboardController extends Controller
         $wind = [];
         foreach ($allData as $singleData) {
             $labels = strtotime(Carbon::createFromFormat('Y-m-d H:i:s', $singleData->created_at, config('app.timezone'))->setTimezone($request->timeZone)) * 1000;
-            $gust[] = [$labels, isset($singleData->gust) ? floatval($singleData->gust) : ''];
-            $wind[] = [$labels, isset($singleData->wind) ? floatval($singleData->wind) : ''];
+            $gust[] = [$labels, isset($singleData->gust) ? floatval($singleData->gust) : 0];
+            $wind[] = [$labels, isset($singleData->wind) ? floatval($singleData->wind) : 0];
         }
         $data['gust'] = $gust;
         $data['wind'] = $wind;
