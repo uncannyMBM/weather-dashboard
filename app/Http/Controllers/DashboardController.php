@@ -99,7 +99,7 @@ class DashboardController extends Controller
 
         if (isset($siteIdAxist) && $siteIdAxist && $dataSourceId != 0) {
             $paramsDerived = $action->paramsDerived($dataSourceId);
-            if (isset($paramsDerived->name) && $paramsDerived->name == 'fdi') {
+            if ($paramsDerived) {
                 $data['is_fdi'] = true;
                 $data['derived_id'] = $paramsDerived->id;
             } else {
@@ -149,7 +149,7 @@ class DashboardController extends Controller
         if (isset($windSpeedData['sensor'])) {
             $data['windSpeedData'] = $action->getLatestChartData($windSpeedData);
             $data['windSpeedMinMax'] = $action->getMinMaxData($windSpeedData, [$currentConvertedTimeStarDay, $currentConvertedTime]);
-            $data['windSpeedAvgLastHour'] = $action->getAvgData($windSpeedData, [$currentConvertedTime1hourBefore, $currentConvertedTime]);
+             $data['windSpeedAvgLastHour'] = $action->getAvgData($windSpeedData, [$currentConvertedTime1hourBefore, $currentConvertedTime]);
         }
 
         $gustSpeedData = $action->findSensorKey($sensors, 'gust_wind_speed_(m/s)');
@@ -251,7 +251,7 @@ class DashboardController extends Controller
 
         if (isset($request->derived_id)) {
             $droughtFactor = $action->getFuncArg($request->derived_id)->arg2 ?? 0;
-            $data['fdiChartData'] = $action->getFDI($data['windSpeedAvgLastHour']->avgData, $droughtFactor, $data['relativeHumidityData']->data, $data['airTempData']->data);
+            $data['fdiChartData'] = $action->getFDI($data['windSpeedAvgLastHour']->avgData ?? 0, $droughtFactor, $data['relativeHumidityData']->data ?? 0, $data['airTempData']->data ?? 0);
         }
 
         return response()->json($data);

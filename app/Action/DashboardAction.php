@@ -139,7 +139,7 @@ class DashboardAction
 
     public function paramsDerived($id)
     {
-        return DB::table('parameters_derived')->select('id', 'name', 'site_data_sources_id', 'deleted_at')->whereNull('deleted_at')->where('site_data_sources_id', $id)->latest()->first();
+        return DB::table('parameters_derived')->select('id', 'name', 'site_data_sources_id', 'deleted_at')->whereNull('deleted_at')->where('name', 'fdi')->where('site_data_sources_id', $id)->latest()->first();
     }
 
     public function getFuncArg($id)
